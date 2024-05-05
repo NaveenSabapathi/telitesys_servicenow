@@ -1,0 +1,83 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <title>Dashboard</title>-->
+<!--    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">-->
+<!--</head>-->
+<!--<body>-->
+<!--    <header>-->
+<!--        <h1>Welcome, {{ current_user.username }}</h1>-->
+<!--        <p>Dashboard</p>-->
+<!--        <a href="{{ url_for('logout') }}">Logout</a>-->
+<!--    </header>-->
+<!--    <main>-->
+<!--        <section class="device-sections">-->
+<!--            {% for section, count in list_data.items() %}-->
+<!--                <a href="#{{ section }}">  <div class="device-section">-->
+<!--                        <h2>{{ section }}</h2>-->
+<!--                        <p>{{ count }}</p>-->
+<!--                        <span class="progress-bar">  <span style="width: {{ (count / safe_sum()) * 100 }}%;"></span>-->
+<!--                        </span>-->
+<!--                    </div>-->
+<!--                </a>-->
+<!--            {% endfor %}-->
+<!--        </section>-->
+<!--    </main>-->
+<!--</body>-->
+<!--</html>-->
+
+<!--&lt;!&ndash;<!DOCTYPE html>&ndash;&gt;-->
+<!--&lt;!&ndash;<html lang="en">&ndash;&gt;-->
+<!--&lt;!&ndash;<head>&ndash;&gt;-->
+<!--&lt;!&ndash;    <meta charset="UTF-8">&ndash;&gt;-->
+<!--&lt;!&ndash;    <meta name="viewport" content="width=device-width, initial-scale=1.0">&ndash;&gt;-->
+<!--&lt;!&ndash;    <title>Dashboard</title>&ndash;&gt;-->
+<!--&lt;!&ndash;    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">&ndash;&gt;-->
+<!--&lt;!&ndash;</head>&ndash;&gt;-->
+<!--&lt;!&ndash;<body>&ndash;&gt;-->
+<!--&lt;!&ndash;    <div class="container">&ndash;&gt;-->
+<!--&lt;!&ndash;        <h1>Dashboard</h1>&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="sections">&ndash;&gt;-->
+<!--&lt;!&ndash;            {% for section, count in list_data.items() %}&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="section">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <a href="{{ url_for('section', section_name=section) }}">&ndash;&gt;-->
+<!--&lt;!&ndash;                        <h3>{{ section }}</h3>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <p>{{ count }}</p>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </a>&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+<!--&lt;!&ndash;            {% endfor %}&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+<!--&lt;!&ndash;</body>&ndash;&gt;-->
+<!--&lt;!&ndash;</html>&ndash;&gt;-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Welcome, {{ current_user.username }}</h1>
+        <p>Dashboard</p>
+        <a href="{{ url_for('logout') }}">Logout</a>
+        <a href="{{ url_for('add_device') }}">Add New Device</a>
+    </header>
+    <main>
+        <section class="device-sections">
+            {% for section, count in list_data.items() %}
+                <a href="{{ url_for('section', section_name=section) }}">
+                    <div class="device-section">
+                        <h2>{{ section }}</h2>
+                        <p>{{ count }}</p>
+                        <span class="progress-bar"><span style="width: {{ (count / safe_sum()) * 100 }}%;"></span></span>
+                    </div>
+                </a>
+            {% endfor %}
+        </section>
+    </main>
+</body>
+</html>
