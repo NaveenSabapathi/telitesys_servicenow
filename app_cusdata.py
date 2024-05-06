@@ -4,6 +4,9 @@ from models import User, db, Device, Customer
 from functools import partial
 from flask_migrate import Migrate
 from flask import jsonify
+import matplotlib.pyplot as plt
+import io
+import base64
 
 app = Flask(__name__)
 
@@ -44,21 +47,48 @@ def login():
 
 # Registration route (similar to login route)
 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = User(username=username)
+        user.set_password(password)  # Use set_password from User model
+        db.session.add(user)
+        db.session.commit()
+        flash('Registration successful! Please login.', 'success')
+        return redirect(url_for('login'))
+    return render_template('register.html')
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    # Placeholder device data
+
     assigned_devices_count = Device.query.filter_by(device_status='Assigned').count()
-    unassigned_devices_count = Device.query.filter_by(device_status='unassigned').count()
-    device_data = {
-        'Available service devices': assigned_devices_count,
-        'Device Ready': 2,
-        'Under warranty': 4,
-        'Device return': 0,
-        'Device unassigned': unassigned_devices_count,
-    }
-    safe_sum = partial(sum, device_data.values())
-    return render_template('dashboard.html', list_data=device_data, safe_sum=safe_sum)
+    available_devices = Device.query.filter_by(device_status='Assigned').all()
+    unassigned_devices_count = Device.query.filter_by(device_status='Unassigned').count()
+
+    # Matplotlib bar chart
+    plt.figure(figsize=(8, 6))
+    plt.bar(['Assigned Devices'], [assigned_devices_count], color='skyblue')
+    plt.xlabel('Device Status')
+    plt.ylabel('Count')
+    plt.title('Assigned Devices Count')
+    plt.grid(True)
+
+    # Convert the plot to HTML format
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)
+    plot_data = base64.b64encode(buffer.getvalue()).decode()
+    plt.close()
+
+    return render_template('dashboard.html', assigned_devices_count=assigned_devices_count,unassigned_devices_count=unassigned_devices_count, available_devices=available_devices, plot_data=plot_data)
+
+
+    # return render_template('dashboard.html', list_data=device_data, safe_sum=safe_sum)
 
 @app.route('/section/<section_name>')
 def section(section_name):

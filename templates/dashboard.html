@@ -1,83 +1,138 @@
-<!--<!DOCTYPE html>-->
-<!--<html lang="en">-->
-<!--<head>-->
-<!--    <meta charset="UTF-8">-->
-<!--    <title>Dashboard</title>-->
-<!--    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">-->
-<!--</head>-->
-<!--<body>-->
-<!--    <header>-->
-<!--        <h1>Welcome, {{ current_user.username }}</h1>-->
-<!--        <p>Dashboard</p>-->
-<!--        <a href="{{ url_for('logout') }}">Logout</a>-->
-<!--    </header>-->
-<!--    <main>-->
-<!--        <section class="device-sections">-->
-<!--            {% for section, count in list_data.items() %}-->
-<!--                <a href="#{{ section }}">  <div class="device-section">-->
-<!--                        <h2>{{ section }}</h2>-->
-<!--                        <p>{{ count }}</p>-->
-<!--                        <span class="progress-bar">  <span style="width: {{ (count / safe_sum()) * 100 }}%;"></span>-->
-<!--                        </span>-->
-<!--                    </div>-->
-<!--                </a>-->
-<!--            {% endfor %}-->
-<!--        </section>-->
-<!--    </main>-->
-<!--</body>-->
-<!--</html>-->
-
-<!--&lt;!&ndash;<!DOCTYPE html>&ndash;&gt;-->
-<!--&lt;!&ndash;<html lang="en">&ndash;&gt;-->
-<!--&lt;!&ndash;<head>&ndash;&gt;-->
-<!--&lt;!&ndash;    <meta charset="UTF-8">&ndash;&gt;-->
-<!--&lt;!&ndash;    <meta name="viewport" content="width=device-width, initial-scale=1.0">&ndash;&gt;-->
-<!--&lt;!&ndash;    <title>Dashboard</title>&ndash;&gt;-->
-<!--&lt;!&ndash;    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">&ndash;&gt;-->
-<!--&lt;!&ndash;</head>&ndash;&gt;-->
-<!--&lt;!&ndash;<body>&ndash;&gt;-->
-<!--&lt;!&ndash;    <div class="container">&ndash;&gt;-->
-<!--&lt;!&ndash;        <h1>Dashboard</h1>&ndash;&gt;-->
-<!--&lt;!&ndash;        <div class="sections">&ndash;&gt;-->
-<!--&lt;!&ndash;            {% for section, count in list_data.items() %}&ndash;&gt;-->
-<!--&lt;!&ndash;                <div class="section">&ndash;&gt;-->
-<!--&lt;!&ndash;                    <a href="{{ url_for('section', section_name=section) }}">&ndash;&gt;-->
-<!--&lt;!&ndash;                        <h3>{{ section }}</h3>&ndash;&gt;-->
-<!--&lt;!&ndash;                        <p>{{ count }}</p>&ndash;&gt;-->
-<!--&lt;!&ndash;                    </a>&ndash;&gt;-->
-<!--&lt;!&ndash;                </div>&ndash;&gt;-->
-<!--&lt;!&ndash;            {% endfor %}&ndash;&gt;-->
-<!--&lt;!&ndash;        </div>&ndash;&gt;-->
-<!--&lt;!&ndash;    </div>&ndash;&gt;-->
-<!--&lt;!&ndash;</body>&ndash;&gt;-->
-<!--&lt;!&ndash;</html>&ndash;&gt;-->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .device-sections {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .device-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            flex-basis: calc(33.333% - 20px);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .device-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .device-section h2 {
+            margin: 0;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .device-section p {
+            font-size: 18px;
+            margin: 0;
+        }
+        .progress-bar {
+            display: block;
+            width: 100%;
+            height: 12px;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        .progress-bar span {
+            display: block;
+            height: 100%;
+            background-color: #4caf50;
+        }
+        main {
+            margin-top: 20px;
+        }
+        .plot-image {
+            max-width: 100%;
+            display: block;
+            margin: 20px auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            transition-duration: 0.4s;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
     <header>
         <h1>Welcome, {{ current_user.username }}</h1>
         <p>Dashboard</p>
-        <a href="{{ url_for('logout') }}">Logout</a>
-        <a href="{{ url_for('add_device') }}">Add New Device</a>
+        <button class="button" onclick="window.location.href='{{ url_for('logout') }}'">Logout</button>
+        <button class="button" onclick="window.location.href='{{ url_for('add_device') }}'">Add New Device</button>
     </header>
-    <main>
+    <div class="container">
         <section class="device-sections">
-            {% for section, count in list_data.items() %}
-                <a href="{{ url_for('section', section_name=section) }}">
-                    <div class="device-section">
-                        <h2>{{ section }}</h2>
-                        <p>{{ count }}</p>
-                        <span class="progress-bar"><span style="width: {{ (count / safe_sum()) * 100 }}%;"></span></span>
-                    </div>
-                </a>
-            {% endfor %}
+            <div class="device-section">
+                <h2>Assigned Devices</h2>
+                <p>{{ assigned_devices_count }}</p>
+                <div class="progress-bar">
+                    <span style="width: {{ (assigned_devices_count / (assigned_devices_count + available_devices|length)) * 100 }}%;"></span>
+                </div>
+            </div>
+                        <div class="device-section">
+                <h2>Unassigned Devices</h2>
+                <p>{{ unassigned_devices_count }}</p>
+                <div class="progress-bar">
+                    <span style="width: {{ (unassigned_devices_count / (unassigned_devices_count + available_devices|length)) * 100 }}%;"></span>
+                </div>
+            </div>
+                        <div class="device-section">
+                <h2>Delivery Ready</h2>
+                <p>{{ assigned_devices_count }}</p>
+                <div class="progress-bar">
+                    <span style="width: {{ (assigned_devices_count / (assigned_devices_count + 2 + available_devices|length)) * 100 }}%;"></span>
+                </div>
+            </div>
+            <!-- Add more sections here -->
         </section>
-    </main>
+        <main>
+<!--            <img src="data:image/png;base64,{{ plot_data }}" alt="Assigned Devices Count" class="plot-image">-->
+        </main>
+    </div>
 </body>
 </html>
