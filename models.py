@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import DateTime, Float
 
 db = SQLAlchemy()
 
@@ -9,6 +10,7 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
+    phone_number = db.Column(db.String(20), unique=True, nullable=False)  # New phone number field
     user_level = db.Column(db.String(128), default="admin")
 
 
@@ -33,13 +35,16 @@ class Device(db.Model):
     service_id = db.Column(db.Integer, unique=True, nullable=False)
     added_by = db.Column(db.String(80))
 
+    # New fields for date and budget
+    received_date = db.Column(DateTime, nullable=False)
+    expected_delivery_date = db.Column(DateTime, nullable=False)
+    expected_budget = db.Column(Float, nullable=False)
+
     # Define the foreign key relationship with Customer
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
 
     def __repr__(self):
         return f"Device('{self.device_name}', '{self.model}', '{self.serial_number}')"
-
-
 
 class Customer(db.Model):
     id = db.Column(db.Integer, primary_key=True)

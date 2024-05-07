@@ -111,27 +111,39 @@
                 <h2>Assigned Devices</h2>
                 <p>{{ assigned_devices_count }}</p>
                 <div class="progress-bar">
-                    <span style="width: {{ (assigned_devices_count / (assigned_devices_count + available_devices|length)) * 100 }}%;"></span>
+                    {% if assigned_devices_count + available_devices|length != 0 %}
+                        <span style="width: {{ (assigned_devices_count / (assigned_devices_count + available_devices|length)) * 100 }}%;"></span>
+                    {% else %}
+                        <span style="width: 0%;"></span>
+                    {% endif %}
                 </div>
             </div>
-                        <div class="device-section">
+            <div class="device-section">
                 <h2>Unassigned Devices</h2>
                 <p>{{ unassigned_devices_count }}</p>
                 <div class="progress-bar">
-                    <span style="width: {{ (unassigned_devices_count / (unassigned_devices_count + available_devices|length)) * 100 }}%;"></span>
+                    {% if unassigned_devices_count + available_devices|length != 0 %}
+                        <span style="width: {{ (unassigned_devices_count / (unassigned_devices_count + available_devices|length)) * 100 }}%;"></span>
+                    {% else %}
+                        <span style="width: 0%;"></span>
+                    {% endif %}
                 </div>
             </div>
-                        <div class="device-section">
+            <div class="device-section">
                 <h2>Delivery Ready</h2>
                 <p>{{ assigned_devices_count }}</p>
                 <div class="progress-bar">
-                    <span style="width: {{ (assigned_devices_count / (assigned_devices_count + 2 + available_devices|length)) * 100 }}%;"></span>
+                    {% if assigned_devices_count + available_devices|length != 0 %}
+                        <span style="width: {{ (assigned_devices_count / (assigned_devices_count + 2 + available_devices|length)) * 100 }}%;"></span>
+                    {% else %}
+                        <span style="width: 0%;"></span>
+                    {% endif %}
                 </div>
             </div>
             <!-- Add more sections here -->
         </section>
         <main>
-<!--            <img src="data:image/png;base64,{{ plot_data }}" alt="Assigned Devices Count" class="plot-image">-->
+            <!-- <img src="data:image/png;base64,{{ plot_data }}" alt="Assigned Devices Count" class="plot-image"> -->
         </main>
     </div>
 </body>

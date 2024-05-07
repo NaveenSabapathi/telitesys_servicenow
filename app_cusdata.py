@@ -3,10 +3,12 @@ from flask_login import LoginManager, login_user, current_user, logout_user, log
 from models import User, db, Device, Customer
 from functools import partial
 from flask_migrate import Migrate
+from flask import render_template
 from flask import jsonify
 import matplotlib.pyplot as plt
 import io
 import base64
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -54,7 +56,12 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        user = User(username=username)
+        phone_number = request.form['phone_number']
+        print(phone_number)
+        if User.query.filter_by(phone_number=phone_number).first():
+            flash('Phone number already registered', 'error')
+            return redirect(url_for('register'))
+        user = User(username=username,phone_number=phone_number)
         user.set_password(password)  # Use set_password from User model
         db.session.add(user)
         db.session.commit()
@@ -148,6 +155,10 @@ def add_device():
         device_status = request.form['device_status']
         remark = request.form['remark']
 
+        received_date = datetime.strptime(request.form['received_date'], '%Y-%m-%d')
+        expected_delivery_date = datetime.strptime(request.form['expected_delivery_date'], '%Y-%m-%d')
+        expected_budget = float(request.form['expected_budget'])
+
         # Generate unique service ID
         last_device = Device.query.order_by(Device.id.desc()).first()
         if last_device:
@@ -166,7 +177,10 @@ def add_device():
             remark=remark,
             service_id=service_id,
             customer_id=customer.id,
-            added_by=current_user.id  # Assuming you're tracking the user who added the device
+            added_by=current_user.id,  # Assuming you're tracking the user who added the device
+            received_date=received_date,
+            expected_delivery_date=expected_delivery_date,
+            expected_budget=expected_budget
         )
         db.session.add(new_device)
         db.session.commit()
@@ -176,8 +190,15 @@ def add_device():
 
     # If the request method is GET, render the add_device template
     return render_template('add_device.html')
-
 # Section route (similar to login and dashboard routes)
+
+
+@app.route('/assigned_devices')
+@login_required
+def assigned_devices():
+    # Fetch assigned devices from the database (you need to implement this logic)
+    assigned_devices = Device.query.filter_by(device_status='Assigned').all()
+    return render_template('assigned_devices.html', assigned_devices=assigned_devices)
 
 @app.route('/logout')
 @login_required
@@ -188,4 +209,4 @@ def logout():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()  # Create database tables if they don't exist (optional)
-        app.run(debug=True)  # Run the development server
+        app.run(host='0.0.0.0',debug=True)  # Run the development server

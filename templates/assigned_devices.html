@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assigned Devices</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Assigned Devices</h1>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Device Type</th>
+                    <th>Device Name</th>
+                    <th>Model</th>
+                    <th>Serial Number</th>
+                    <th>Issue Description</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for device in assigned_devices %}
+                <tr>
+                    <td>{{ device.device_type }}</td>
+                    <td>{{ device.device_name }}</td>
+                    <td>{{ device.model }}</td>
+                    <td>{{ device.serial_number }}</td>
+                    <td>{{ device.issue_description }}</td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Change State
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item" href="#">Assigned</a>
+                                <a class="dropdown-item" href="#">Servicing</a>
+                                <a class="dropdown-item" href="#">Ready</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
