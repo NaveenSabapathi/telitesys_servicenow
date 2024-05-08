@@ -1,0 +1,236 @@
+
+<!--&lt;!&ndash;<!DOCTYPE html>&ndash;&gt;-->
+<!--&lt;!&ndash;<html lang="en">&ndash;&gt;-->
+<!--&lt;!&ndash;<head>&ndash;&gt;-->
+<!--&lt;!&ndash;    <meta charset="UTF-8">&ndash;&gt;-->
+<!--&lt;!&ndash;    <meta name="viewport" content="width=device-width, initial-scale=1.0">&ndash;&gt;-->
+<!--&lt;!&ndash;    <title>Add Device</title>&ndash;&gt;-->
+<!--&lt;!&ndash;    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">&ndash;&gt;-->
+<!--&lt;!&ndash;</head>&ndash;&gt;-->
+<!--&lt;!&ndash;<body>&ndash;&gt;-->
+<!--&lt;!&ndash;    <div class="container">&ndash;&gt;-->
+<!--&lt;!&ndash;        <h1>Add Device</h1>&ndash;&gt;-->
+<!--&lt;!&ndash;        <form action="{{ url_for('add_device') }}" method="POST" class="form">&ndash;&gt;-->
+<!--&lt;!&ndash;            <div class="form-group">&ndash;&gt;-->
+<!--&lt;!&ndash;                <label for="whatsapp_number">WhatsApp Number</label>&ndash;&gt;-->
+<!--&lt;!&ndash;                <input type="text" id="whatsapp_number" name="whatsapp_number" required>&ndash;&gt;-->
+<!--&lt;!&ndash;                <button type="button" onclick="searchCustomer()">Search</button>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+<!--&lt;!&ndash;            <div class="form-group" id="customer_details" style="display: none;"> </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                <div class="form-group">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <label for="customer_name">Customer Name</label>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <input type="text" id="customer_name" name="customer_name" required>&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="form-group">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <label for="location">Location</label>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <input type="text" id="location" name="location" required>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                &lt;!&ndash; Customer details will be autopopulated here &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                    </div>&ndash;&gt;-->
+<!--&lt;!&ndash;            <div class="form-group">&ndash;&gt;-->
+<!--&lt;!&ndash;                <label for="device_type">Device Type</label>&ndash;&gt;-->
+<!--&lt;!&ndash;                <select id="device_type" name="device_type" required>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <option value="Laptop">Laptop</option>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <option value="Desktop">Desktop</option>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <option value="Printer">Printer</option>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <option value="Other">Other</option>&ndash;&gt;-->
+<!--&lt;!&ndash;                </select>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+<!--&lt;!&ndash;            <div class="form-group">&ndash;&gt;-->
+<!--&lt;!&ndash;                <label for="device_name">Device Name</label>&ndash;&gt;-->
+<!--&lt;!&ndash;                <input type="text" id="device_name" name="device_name" required>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+<!--&lt;!&ndash;            <div class="form-group">&ndash;&gt;-->
+<!--&lt;!&ndash;                <label for="model">Model</label>&ndash;&gt;-->
+<!--&lt;!&ndash;                <input type="text" id="model" name="model" required>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+<!--&lt;!&ndash;            <div class="form-group">&ndash;&gt;-->
+<!--&lt;!&ndash;                <label for="serial_number">Serial Number</label>&ndash;&gt;-->
+<!--&lt;!&ndash;                <input type="text" id="serial_number" name="serial_number" required>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+<!--&lt;!&ndash;            <div class="form-group">&ndash;&gt;-->
+<!--&lt;!&ndash;                <label for="issue_description">Issue Description</label>&ndash;&gt;-->
+<!--&lt;!&ndash;                <textarea id="issue_description" name="issue_description" rows="4" required></textarea>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+<!--&lt;!&ndash;            <div class="form-group">&ndash;&gt;-->
+<!--&lt;!&ndash;                <label for="device_status">Device Status</label>&ndash;&gt;-->
+<!--&lt;!&ndash;                <select id="device_status" name="device_status" required>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <option value="Unassigned">Unassigned</option>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <option value="Assigned">Assigned</option>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <option value="Under Repair">Under Repair</option>&ndash;&gt;-->
+<!--&lt;!&ndash;                </select>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+<!--&lt;!&ndash;            <div class="form-group">&ndash;&gt;-->
+<!--&lt;!&ndash;                <label for="remark">Remark</label>&ndash;&gt;-->
+<!--&lt;!&ndash;                <textarea id="remark" name="remark" rows="4"></textarea>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+<!--&lt;!&ndash;            <button type="submit" class="btn">Add Device</button>&ndash;&gt;-->
+<!--&lt;!&ndash;        </form>&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    &lt;!&ndash; JavaScript for searching customer details &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;    <script>&ndash;&gt;-->
+<!--&lt;!&ndash;        function searchCustomer() {&ndash;&gt;-->
+<!--&lt;!&ndash;        var whatsappNumber = document.getElementById('whatsapp_number').value;&ndash;&gt;-->
+<!--&lt;!&ndash;        var xhr = new XMLHttpRequest();&ndash;&gt;-->
+<!--&lt;!&ndash;        xhr.open('GET', '/search_customer/' + whatsappNumber, true);&ndash;&gt;-->
+<!--&lt;!&ndash;        xhr.onreadystatechange = function() {&ndash;&gt;-->
+<!--&lt;!&ndash;            if (xhr.readyState == 4 && xhr.status == 200) {&ndash;&gt;-->
+<!--&lt;!&ndash;                var response = JSON.parse(xhr.responseText);&ndash;&gt;-->
+<!--&lt;!&ndash;                if (response.error) {&ndash;&gt;-->
+<!--&lt;!&ndash;                    // Customer not found, clear previous customer details&ndash;&gt;-->
+<!--&lt;!&ndash;                    document.getElementById('customer_name').value = '';&ndash;&gt;-->
+<!--&lt;!&ndash;                    document.getElementById('location').value = '';&ndash;&gt;-->
+<!--&lt;!&ndash;                } else {&ndash;&gt;-->
+<!--&lt;!&ndash;                    // Customer found, populate customer details&ndash;&gt;-->
+<!--&lt;!&ndash;                    document.getElementById('customer_name').value = response.name;&ndash;&gt;-->
+<!--&lt;!&ndash;                    document.getElementById('location').value = response.location;&ndash;&gt;-->
+<!--&lt;!&ndash;                }&ndash;&gt;-->
+<!--&lt;!&ndash;            }&ndash;&gt;-->
+<!--&lt;!&ndash;        };&ndash;&gt;-->
+<!--&lt;!&ndash;        xhr.send();&ndash;&gt;-->
+<!--&lt;!&ndash;        }&ndash;&gt;-->
+<!--&lt;!&ndash;    </script>&ndash;&gt;-->
+<!--&lt;!&ndash;</body>&ndash;&gt;-->
+<!--&lt;!&ndash;</html>&ndash;&gt;-->
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Add Device</title>-->
+<!--    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">-->
+<!--    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">-->
+<!--</head>-->
+<!--<body>-->
+<!--    <div class="container">-->
+<!--        <h1>Add Device</h1>-->
+<!--        <form action="{{ url_for('add_device') }}" method="POST" class="form">-->
+<!--            <div class="form-group">-->
+<!--                <label for="whatsapp_number" class="col-sm-3 col-form-label">WhatsApp Number</label>-->
+<!--                <div class="col-sm-5">-->
+<!--                    <input type="text" id="whatsapp_number" name="whatsapp_number" class="form-control" required>-->
+<!--                </div>-->
+<!--                <div class="col-sm-1">-->
+<!--                    <button type="button" onclick="searchCustomer()" class="btn btn-primary">Search</button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--&lt;!&ndash;            <div id="customer_details" >style="display: none;">&ndash;&gt;-->
+<!--                <div id="customer_details" >-->
+<!--                <div class="form-group">-->
+<!--                    <label for="customer_name" class="col-sm-3 col-form-label">Customer Name</label>-->
+<!--                    <div class="col-sm-9">-->
+<!--                        <input type="text" id="customer_name" name="customer_name" class="form-control" required>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="form-group ">-->
+<!--                    <label for="location" class="col-sm-3 col-form-label">Location</label>-->
+<!--                    <div class="col-sm-9">-->
+<!--                        <input type="text" id="location" name="location" class="form-control" required>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="form-group ">-->
+<!--                <label for="device_type" class="col-sm-3 col-form-label">Device Type</label>-->
+<!--                <div class="col-sm-6">-->
+<!--                    <select id="device_type" name="device_type" class="form-control" required>-->
+<!--                        <option value="Laptop">Laptop</option>-->
+<!--                        <option value="Desktop">Desktop</option>-->
+<!--                        <option value="Printer">Printer</option>-->
+<!--                        <option value="Other">Other</option>-->
+<!--                    </select>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="form-group ">-->
+<!--                <label for="device_name" class="col-sm-3 col-form-label">Device Name</label>-->
+<!--                <div class="col-sm-9">-->
+<!--                    <input type="text" id="device_name" name="device_name" class="form-control" required>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="form-group ">-->
+<!--                <label for="model" class="col-sm-3 col-form-label">Model</label>-->
+<!--                <div class="col-sm-9">-->
+<!--                    <input type="text" id="model" name="model" class="form-control" required>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="form-group ">-->
+<!--                <label for="serial_number" class="col-sm-3 col-form-label">Serial Number</label>-->
+<!--                <div class="col-sm-9">-->
+<!--                    <input type="text" id="serial_number" name="serial_number" class="form-control" required>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="form-group ">-->
+<!--                <label for="issue_description" class="col-sm-3 col-form-label">Issue Description</label>-->
+<!--                <div class="col-sm-9">-->
+<!--                    <textarea id="issue_description" name="issue_description" rows="4" class="form-control" required></textarea>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="form-group ">-->
+<!--                <label for="device_status" class="col-sm-3 col-form-label">Device Status</label>-->
+<!--                <div class="col-sm-9">-->
+<!--                    <select id="device_status" name="device_status" class="form-control" required>-->
+<!--                        <option value="Unassigned">Unassigned</option>-->
+<!--                        <option value="Assigned">Assigned</option>-->
+<!--                        <option value="Under Repair">Under Repair</option>-->
+<!--                    </select>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="form-group ">-->
+<!--                <label for="remark" class="col-sm-3 col-form-label">Remark</label>-->
+<!--                <div class="col-sm-9">-->
+<!--                    <textarea id="remark" name="remark" rows="4" class="form-control"></textarea>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="form-group row">-->
+<!--                <label for="received_date" class="col-sm-3 col-form-label">Received Date</label>-->
+<!--                <div class="col-sm-9">-->
+<!--                    <input type="date" id="received_date" name="received_date" class="form-control" required>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="form-group row">-->
+<!--                <label for="expected_delivery_date" class="col-sm-3 col-form-label">Expected Delivery Date</label>-->
+<!--                <div class="col-sm-9">-->
+<!--                    <input type="date" id="expected_delivery_date" name="expected_delivery_date" class="form-control" required>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="form-group ">-->
+<!--                <label for="expected_budget" class="col-sm-3 col-form-label">Expected Budget</label>-->
+<!--                <div class="col-sm-5 input-group">-->
+<!--                    <div class="input-group-prepend">-->
+<!--                        <span class="input-group-text">₹</span>-->
+<!--                    </div>-->
+<!--                    <input type="number" id="expected_budget" name="expected_budget" class="form-control" required>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <button type="submit" class="btn btn-primary btn-block">Add Device</button>-->
+<!--        </form>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; JavaScript for searching customer details &ndash;&gt;-->
+
+<!--    &lt;!&ndash; JavaScript for searching customer details &ndash;&gt;-->
+<!--    <script>-->
+<!--        function searchCustomer() {-->
+<!--        var whatsappNumber = document.getElementById('whatsapp_number').value;-->
+<!--        var xhr = new XMLHttpRequest();-->
+<!--        xhr.open('GET', '/search_customer/' + whatsappNumber, true);-->
+<!--        xhr.onreadystatechange = function() {-->
+<!--            if (xhr.readyState == 4 && xhr.status == 200) {-->
+<!--                var response = JSON.parse(xhr.responseText);-->
+<!--                if (response.error) {-->
+<!--                    // Customer not found, clear previous customer details-->
+<!--                    document.getElementById('customer_name').value = '';-->
+<!--                    document.getElementById('location').value = '';-->
+<!--                } else {-->
+<!--                    // Customer found, populate customer details-->
+<!--                    document.getElementById('customer_name').value = response.name;-->
+<!--                    document.getElementById('location').value = response.location;-->
+<!--                }-->
+<!--            }-->
+<!--        };-->
+<!--        xhr.send();-->
+<!--        }-->
+<!--    </script>-->
+<!--</body>-->
+<!--</html>-->

@@ -5,6 +5,8 @@ from functools import partial
 from flask_migrate import Migrate
 from flask import render_template
 from flask import jsonify
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import io
 import base64
