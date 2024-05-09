@@ -107,7 +107,8 @@
     </header>
     <div class="container">
         <section class="device-sections">
-            <div class="device-section">
+            <div class="device-section" >
+               <a href="{{ url_for('assigned_devices') }}">
                 <h2>Assigned Devices</h2>
                 <p>{{ assigned_devices_count }}</p>
                 <div class="progress-bar">
@@ -117,6 +118,7 @@
                         <span style="width: 0%;"></span>
                     {% endif %}
                 </div>
+                </a>
             </div>
             <div class="device-section">
                 <h2>Unassigned Devices</h2>
@@ -140,6 +142,10 @@
                     {% endif %}
                 </div>
             </div>
+             <div class="device-section">
+            <h2>Service Time Overlap</h2>
+            <p>{{ pending_delivery_count }}</p>
+               </div>
             <!-- Add more sections here -->
         </section>
         <main>

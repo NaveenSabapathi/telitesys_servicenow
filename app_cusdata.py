@@ -78,6 +78,8 @@ def dashboard():
     assigned_devices_count = Device.query.filter_by(device_status='Assigned').count()
     available_devices = Device.query.filter_by(device_status='Assigned').all()
     unassigned_devices_count = Device.query.filter_by(device_status='Unassigned').count()
+    today = datetime.now().date()
+    pending_delivery_count = Device.query.filter(Device.expected_delivery_date < today).count()
 
     # Matplotlib bar chart
     plt.figure(figsize=(8, 6))
@@ -94,7 +96,7 @@ def dashboard():
     plot_data = base64.b64encode(buffer.getvalue()).decode()
     plt.close()
 
-    return render_template('dashboard.html', assigned_devices_count=assigned_devices_count,unassigned_devices_count=unassigned_devices_count, available_devices=available_devices, plot_data=plot_data)
+    return render_template('dashboard.html', assigned_devices_count=assigned_devices_count,pending_delivery_count=pending_delivery_count,unassigned_devices_count=unassigned_devices_count, available_devices=available_devices, plot_data=plot_data)
 
 
     # return render_template('dashboard.html', list_data=device_data, safe_sum=safe_sum)
@@ -104,6 +106,13 @@ def section(section_name):
     # Your logic for the section endpoint
     return render_template('dashboard.html')
     pass
+
+# @app.route('/assigned_devices')
+# @login_required
+# def assigned_devices():
+#     # Fetch assigned devices from the database
+#     assigned_devices = Device.query.filter_by(device_status='Assigned').all()
+#     return render_template('assigned_devices.html', assigned_devices=assigned_devices)
 
 @app.route('/search_customer/<whatsapp_number>', methods=['GET'])
 def search_customer(whatsapp_number):
