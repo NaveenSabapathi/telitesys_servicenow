@@ -4,12 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assigned Devices</title>
-    <!-- Add your CSS links here -->
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        /* Custom CSS */
+        body {
+            background-color: #f8f9fa; /* Light gray background */
+            color: #343a40; /* Dark gray text */
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .table thead th {
+            background-color: #007bff; /* Blue header background */
+            color: #fff; /* White text */
+        }
+        .table tbody tr:nth-child(even) {
+            background-color: #f8f9fa; /* Alternate row background */
+        }
+        .table tbody tr:hover {
+            background-color: #e9ecef; /* Hover row background */
+        }
+        .pagination {
+            justify-content: center;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>Assigned Devices</h1>
-        <table>
+        <h1 class="text-center mb-4">Assigned Devices</h1>
+        <table class="table table-bordered">
             <thead>
                 <tr>
                     <th>Device Name</th>
@@ -26,11 +51,27 @@
                         <td>{{ device.serial_number }}</td>
                         <td>{{ device.issue_description }}</td>
                         <td>{{ device.device_status }}</td>
-                        <td><a href="{{ url_for('service', device_id=device.id) }}">Service</a></td>
+                        <td><a href="{{ url_for('service', device_id=device.id) }}" class="btn btn-primary btn-sm">Service</a></td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
+
+        <!-- Pagination -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                <li class="page-item"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item"><a class="page-link" href="#">Next</a></li>
+            </ul>
+        </nav>
     </div>
+
+    <!-- Bootstrap JS (Optional) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

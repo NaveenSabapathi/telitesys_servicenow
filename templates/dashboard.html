@@ -134,15 +134,17 @@
                  </a>
             </div>
             <div class="device-section">
+                <a href="{{ url_for('delivery_ready') }}">
                 <h2>Delivery Ready</h2>
-                <p>{{ assigned_devices_count }}</p>
+                <p>{{ delivery_ready_devices }}</p>
                 <div class="progress-bar">
                     {% if assigned_devices_count + available_devices|length != 0 %}
-                        <span style="width: {{ (assigned_devices_count / (assigned_devices_count + 2 + available_devices|length)) * 100 }}%;"></span>
+                        <span style="width: {{ (delivery_ready_devices / (assigned_devices_count + 2 + available_devices|length)) * 100 }}%;"></span>
                     {% else %}
                         <span style="width: 0%;"></span>
                     {% endif %}
                 </div>
+                </a>
             </div>
              <div class="device-section">
             <h2>Service Time Overlap</h2>

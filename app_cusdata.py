@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import io
 import base64
 from datetime import datetime
+from sqlalchemy.orm import joinedload
 
 app = Flask(__name__)
 
@@ -18,7 +19,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_strong_secret_key'
 
 # Adjust database URI as needed. Consider using an environment variable.
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///new1.db'  # Or other database connection details
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'  # Or other database connection details
 
 db.init_app(app)
 
@@ -95,6 +96,7 @@ def dashboard():
     assigned_devices_count = Device.query.filter_by(assign_status='Assigned').count()
     available_devices = Device.query.filter_by(assign_status='Assigned').all()
     unassigned_devices_count = Device.query.filter_by(assign_status='Unassigned').count()
+    delivery_ready_devices = Device.query.filter_by(assign_status='Delivery Pending').count()
     today = datetime.now().date()
     pending_delivery_count = Device.query.filter(Device.expected_delivery_date < today).count()
 
@@ -113,7 +115,7 @@ def dashboard():
     # plot_data = base64.b64encode(buffer.getvalue()).decode()
     # plt.close()
 
-    return render_template('dashboard.html', assigned_devices_count=assigned_devices_count,pending_delivery_count=pending_delivery_count,unassigned_devices_count=unassigned_devices_count, available_devices=available_devices, )
+    return render_template('dashboard.html', assigned_devices_count=assigned_devices_count,pending_delivery_count=pending_delivery_count,unassigned_devices_count=unassigned_devices_count, delivery_ready_devices=delivery_ready_devices, )
     # plot_data=plot_data)
 
 
@@ -124,7 +126,6 @@ def section(section_name):
     # Your logic for the section endpoint
     return render_template('dashboard.html')
     pass
-
 
 @app.route('/search_customer/<whatsapp_number>', methods=['GET'])
 def search_customer(whatsapp_number):
@@ -222,18 +223,56 @@ def device_assign():
 
     unassigned_devices = Device.query.filter_by(assign_status='Unassigned').all()
     print(type(unassigned_devices))
-    if unassigned_devices != None:
+    if unassigned_devices != []:
         cus = []
         for device in unassigned_devices:
             users = device.customer_id
             customer = Customer.query.get(users)
             cus.append(customer)
     else:
-        return render_template("dashboard.html")
+        return redirect(url_for('dashboard'))
 
 
     user = User.query.filter_by(user_level="admin").all()
     return render_template('device_assign.html',  unassigned_devices = unassigned_devices, available_users = user, customer = cus)
+
+# @app.route('/delivery_ready')
+# def delivery_ready():
+#     # Query devices with delivery pending status
+#     delivery_devices = Device.query.filter_by(assign_status='Delivery Pending').all()
+#     if delivery_devices == [] :
+#         return redirect(url_for('dashboard'))
+#     device_service_info = []
+#     print(delivery_devices)
+#     for device in delivery_devices:
+#         s_id = device.id
+#         print("service id is: ",s_id)
+#         service_id = SparePart.query.filter_by(service_id = s_id).all()
+#         print("query result",service_id)
+#         device_service_info.append(service_id)
+#         # for service in device_service_info:
+#         #     print("level 2",service.service_id)
+#
+#     # return render_template('delivery_ready.html', devices_with_service_info=devices_service_info)
+#
+#     return render_template('delivery_ready.html', delivery_devices=delivery_devices, device_service_info=service_id)
+
+@app.route('/delivery_ready')
+def delivery_ready():
+    # Query devices with delivery pending status
+    delivery_devices = Device.query.filter_by(assign_status='Delivery Pending').all()
+    if not delivery_devices:
+        return redirect(url_for('dashboard'))
+
+    device_service_info = {}
+    for device in delivery_devices:
+        s_id = device.service_id
+        # Query spare parts for each device
+        service_parts = SparePart.query.filter_by(service_id=s_id).all()
+        device_service_info[s_id] = service_parts
+
+    return render_template('delivery_ready.html', delivery_devices=delivery_devices,
+                           device_service_info=device_service_info)
 
 
 @app.route('/assigning_devices', methods=['POST'])
@@ -285,7 +324,7 @@ def finish_service():
         print("device_id is:",device_id)
         user_id = request.form['user_id']
         print("user is:", device_id)
-        # Retrieve t   he device from the database
+        # Retrieve the device from the database
         device = Device.query.get(device_id)
         if device:
             # Update the assigned_to column with the selected user_id
@@ -299,6 +338,27 @@ def finish_service():
     return redirect(url_for('device_assign'))
 
 
+@app.route('/close_device', methods=['POST'])
+def close_device():
+    print("stated close waiting")
+    if request.method == 'POST':
+        device_id = request.form['device_id']
+        print("device_id is:",device_id)
+        bill_value = request.form['bill_value']
+        print("user is:", device_id)
+        # Retrieve the device from the database
+        device = Device.query.get(device_id)
+        if device:
+            # Update the assigned_to column with the selected user_id
+            device.bill_value = bill_value
+            device.assign_status = "Closed"
+            device.device_status = "Ready"
+            db.session.commit()
+            flash('Device State Updated successfully!', 'success')
+        else:
+            flash('Device not found!', 'error')
+
+    return redirect(url_for('dashboard'))
 
 @app.route('/logout')
 @login_required
