@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Details</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        /* Add your custom CSS styles here */
+        /* Example styles */
+        .container {
+            margin-top: 50px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .spare-parts-list {
+            margin-top: 20px;
+        }
+        .pagination {
+            margin-top: 20px;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Service Details</h1>
+        <div class="card">
+            <div class="card-body">
+
+                <h2>Device Details:</h2>
+                <p><strong>Service ID:</strong> {{ dev_id }}</p>
+                <p><strong>Device Name:</strong> {{ device.device_name }}</p>
+                <p><strong>Serial Number:</strong> {{ device.serial_number }}</p>
+                <p><strong>Issue Description:</strong> {{ device.issue_description }}</p>
+            </div>
+        </div>
+        <div class="card mt-3">
+            <div class="card-body">
+                <h2>Spare Parts Used:</h2>
+                <ul class="list-group spare-parts-list">
+                    {% for part in spare_parts %}
+                        <li class="list-group-item">{{ part.name }} - {{ part.cost }}</li>
+                    {% endfor %}
+                </ul>
+                <div class="hidden">
+                    <label for="dev_id">Service ID:</label>
+                    <input type ="hidden" id="dev_id" name="dev_id" value="{{ dev_id }}">
+                </div>
+                <div class="form-group">
+                    <label for="new_spare">New Spare Part Name:</label>
+                    <input type="text" id="new_spare" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="new_cost">Cost:</label>
+                    <input type="number" id="new_cost" class="form-control">
+                </div>
+                <button type="button" class="btn btn-primary" id="add_spare">Add Spare Part</button>
+            </div>
+        </div>
+        <form action="{{ url_for('finish_service', device_id= device_id , user_id= user_id ) }}" method="POST" class="mt-3">
+            <input type="hidden" name="device_id" value={{ dev_id }}>
+            <input type="hidden" name="user_id" value={{ user_is }}>
+            <button type="submit" class="btn btn-success">Finish Service</button>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS (Optional) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // JavaScript for adding new spare parts dynamically
+        $(document).ready(function() {
+            $('#add_spare').click(function() {
+                var newSpare = $('#new_spare').val();
+                var newCost = $('#new_cost').val();
+                var serviceId = $('#dev_id').val(); // Assuming you have a hidden input field with the service_id
+                console.log(serviceId);
+                if (newSpare && newCost && serviceId) {
+                    $.ajax({
+                        url: '/add_spare_part',
+                        type: 'POST',
+                        data: JSON.stringify({name: newSpare, cost: newCost, service_id: serviceId}),
+                        contentType: 'application/json',
+                        success: function(response) {
+                             alert('Spare part added successfully');
+                             $('.spare-parts-list').append('<li class="list-group-item">' + newSpare + ' - ' + newCost + '</li>');
+                             $('#new_spare').val('');
+                             $('#new_cost').val('');
+                            // For example, update UI or display success message
+                            console.log('Spare part added successfully');
+                            // Update UI or perform any other action
+                        },
+                        error: function(xhr, status, error) {
+                            // Handle error response
+                            // For example, display error message
+                            var errorMessage = xhr.responseJSON.message || 'Error adding spare part';
+                            console.error(errorMessage);
+                            // Display error message or perform any other action
+                        }
+                    });
+                } else {
+                    alert('Please enter both spare part name and cost.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

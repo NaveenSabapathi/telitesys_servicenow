@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import DateTime, Float
+from flask_login import UserMixin
 
 db = SQLAlchemy()
 
@@ -30,10 +31,14 @@ class Device(db.Model):
     model = db.Column(db.String(100), nullable=False)
     serial_number = db.Column(db.String(100), nullable=False)
     issue_description = db.Column(db.Text, nullable=False)
-    device_status = db.Column(db.String(100), nullable=False)
+    device_status = db.Column(db.String(100),nullable=False)
+    assign_status = db.Column(db.String(100), default='Unassigned')
     remark = db.Column(db.Text)
     service_id = db.Column(db.Integer, unique=True, nullable=False)
-    added_by = db.Column(db.String(80))
+    assigned_to = db.Column(db.Integer)
+    added_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    bill_value = db.Column(db.Float, default=0.0)
+    bill_status = db.Column(db.String(20), default="unpaid")
 
     # New fields for date and budget
     received_date = db.Column(DateTime, nullable=False)
@@ -54,11 +59,25 @@ class Customer(db.Model):
     device_count = db.Column(db.Integer, default=0)
     bill_value = db.Column(db.Float, default=0.0)
 
+
     # Define a relationship between Customer and Device
     devices = db.relationship('Device', backref='customer', lazy=True)
 
     def __repr__(self):
         return f"Customer('{self.name}', '{self.location}', '{self.whatsapp_number}')"
+
+class Service(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    device_id = db.Column(db.Integer, db.ForeignKey('device.id'), nullable=False)
+    spare_parts = db.relationship('SparePart', backref='service', lazy=True)
+
+class SparePart(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    spare_name = db.Column(db.String(100), nullable=False)
+    cost = db.Column(db.Integer, nullable=False)
+    service_id = db.Column(db.Integer, db.ForeignKey('service.id'), nullable=False)
+
+
 #
 # class User(db.Model):
 #     id = db.Column(db.Integer, primary_key=True)

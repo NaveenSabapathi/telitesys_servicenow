@@ -1,6 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_login import LoginManager, login_user, current_user, logout_user, login_required
-from models import User, db, Device, Customer
+from models import User, db, Device, Customer, SparePart, Service
 from functools import partial
 from flask_migrate import Migrate
 from flask import render_template
@@ -18,7 +18,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_strong_secret_key'
 
 # Adjust database URI as needed. Consider using an environment variable.
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'  # Or other database connection details
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///new1.db'  # Or other database connection details
 
 db.init_app(app)
 
@@ -71,32 +71,50 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html')
 
+@app.route('/add_spare_part', methods=['POST'])
+def add_spare_part():
+    data = request.json
+    name = data.get('name')
+    cost = data.get('cost')
+    service_id = data.get('service_id')
+
+    # Insert spare part data into the database
+    # Example using SQLAlchemy
+    print("trying to add spare part")
+    new_spare_part = SparePart(spare_name=name, cost=cost, service_id = service_id)
+    db.session.add(new_spare_part)
+    db.session.commit()
+    print("Spare added successfully")
+
+    return jsonify({'message': 'Spare part added successfully'})
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
 
-    assigned_devices_count = Device.query.filter_by(device_status='Assigned').count()
-    available_devices = Device.query.filter_by(device_status='Assigned').all()
-    unassigned_devices_count = Device.query.filter_by(device_status='Unassigned').count()
+    assigned_devices_count = Device.query.filter_by(assign_status='Assigned').count()
+    available_devices = Device.query.filter_by(assign_status='Assigned').all()
+    unassigned_devices_count = Device.query.filter_by(assign_status='Unassigned').count()
     today = datetime.now().date()
     pending_delivery_count = Device.query.filter(Device.expected_delivery_date < today).count()
 
     # Matplotlib bar chart
-    plt.figure(figsize=(8, 6))
-    plt.bar(['Assigned Devices'], [assigned_devices_count], color='skyblue')
-    plt.xlabel('Device Status')
-    plt.ylabel('Count')
-    plt.title('Assigned Devices Count')
-    plt.grid(True)
+    # plt.figure(figsize=(8, 6))
+    # plt.bar(['Assigned Devices'], [assigned_devices_count], color='skyblue')
+    # plt.xlabel('Device Status')
+    # plt.ylabel('Count')
+    # plt.title('Assigned Devices Count')
+    # plt.grid(True)
 
     # Convert the plot to HTML format
-    buffer = io.BytesIO()
-    plt.savefig(buffer, format='png')
-    buffer.seek(0)
-    plot_data = base64.b64encode(buffer.getvalue()).decode()
-    plt.close()
+    # buffer = io.BytesIO()
+    # plt.savefig(buffer, format='png')
+    # buffer.seek(0)
+    # plot_data = base64.b64encode(buffer.getvalue()).decode()
+    # plt.close()
 
-    return render_template('dashboard.html', assigned_devices_count=assigned_devices_count,pending_delivery_count=pending_delivery_count,unassigned_devices_count=unassigned_devices_count, available_devices=available_devices, plot_data=plot_data)
+    return render_template('dashboard.html', assigned_devices_count=assigned_devices_count,pending_delivery_count=pending_delivery_count,unassigned_devices_count=unassigned_devices_count, available_devices=available_devices, )
+    # plot_data=plot_data)
 
 
     # return render_template('dashboard.html', list_data=device_data, safe_sum=safe_sum)
@@ -107,12 +125,6 @@ def section(section_name):
     return render_template('dashboard.html')
     pass
 
-# @app.route('/assigned_devices')
-# @login_required
-# def assigned_devices():
-#     # Fetch assigned devices from the database
-#     assigned_devices = Device.query.filter_by(device_status='Assigned').all()
-#     return render_template('assigned_devices.html', assigned_devices=assigned_devices)
 
 @app.route('/search_customer/<whatsapp_number>', methods=['GET'])
 def search_customer(whatsapp_number):
@@ -203,13 +215,90 @@ def add_device():
     return render_template('add_device.html')
 # Section route (similar to login and dashboard routes)
 
+@app.route('/device_assign')
+def device_assign():
+    # Logic to assign devices to users
 
+
+    unassigned_devices = Device.query.filter_by(assign_status='Unassigned').all()
+    print(type(unassigned_devices))
+    if unassigned_devices != None:
+        cus = []
+        for device in unassigned_devices:
+            users = device.customer_id
+            customer = Customer.query.get(users)
+            cus.append(customer)
+    else:
+        return render_template("dashboard.html")
+
+
+    user = User.query.filter_by(user_level="admin").all()
+    return render_template('device_assign.html',  unassigned_devices = unassigned_devices, available_users = user, customer = cus)
+
+
+@app.route('/assigning_devices', methods=['POST'])
+def assigning_devices():
+    if request.method == 'POST':
+        device_id = request.form['device_id']
+        user_id = request.form['user_id']
+
+
+        # Retrieve the device from the database
+        device = Device.query.get(device_id)
+        if device:
+            # Update the assigned_to column with the selected user_id
+            device.assigned_to = user_id
+            device.assign_status = "Assigned"
+            db.session.commit()
+            flash('Device assigned successfully!', 'success')
+        else:
+            flash('Device not found!', 'error')
+
+    return redirect(url_for('assigned_devices'))
+
+
+@app.route('/service/<int:device_id>')
+def service(device_id):
+    # Logic to fetch device details and spare parts for the given device_id
+    device = Device.query.get_or_404(device_id)
+    print(device)
+    dev_id = device_id
+    user_is = Device.assigned_to
+    print(device_id)
+    print("check this",user_is)
+    spare_parts = Service.query.filter_by(device_id=device_id).all()
+    return render_template('service.html', device=device,dev_id=dev_id, spare_parts=spare_parts, user_is = user_is)
 @app.route('/assigned_devices')
 @login_required
 def assigned_devices():
     # Fetch assigned devices from the database (you need to implement this logic)
-    assigned_devices = Device.query.filter_by(device_status='Assigned').all()
+    #todo Assigned --> capital and small cases based key value error recovery needed
+    assigned_devices = Device.query.filter_by(assign_status='Assigned').all()
     return render_template('assigned_devices.html', assigned_devices=assigned_devices)
+
+
+
+@app.route('/finish_service', methods=['POST'])
+def finish_service():
+    if request.method == 'POST':
+        device_id = request.form['device_id']
+        print("device_id is:",device_id)
+        user_id = request.form['user_id']
+        print("user is:", device_id)
+        # Retrieve t   he device from the database
+        device = Device.query.get(device_id)
+        if device:
+            # Update the assigned_to column with the selected user_id
+            device.assigned_to = user_id
+            device.assign_status = "Delivery Pending"
+            db.session.commit()
+            flash('Device assigned successfully!', 'success')
+        else:
+            flash('Device not found!', 'error')
+
+    return redirect(url_for('device_assign'))
+
+
 
 @app.route('/logout')
 @login_required

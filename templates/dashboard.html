@@ -121,6 +121,7 @@
                 </a>
             </div>
             <div class="device-section">
+                 <a href="{{ url_for('device_assign') }}">
                 <h2>Unassigned Devices</h2>
                 <p>{{ unassigned_devices_count }}</p>
                 <div class="progress-bar">
@@ -130,6 +131,7 @@
                         <span style="width: 0%;"></span>
                     {% endif %}
                 </div>
+                 </a>
             </div>
             <div class="device-section">
                 <h2>Delivery Ready</h2>

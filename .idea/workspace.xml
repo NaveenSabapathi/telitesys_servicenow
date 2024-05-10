@@ -5,8 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9174245e-d628-4566-b313-513376855475" name="Changes" comment="no much">
+      <change afterPath="$PROJECT_DIR$/templates/device_assign.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/service.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app_cusdata.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_cusdata.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/instance/users1.db" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/add_device.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/add_device.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/assigned_devices.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/assigned_devices.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboard.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
