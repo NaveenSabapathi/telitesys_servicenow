@@ -216,6 +216,8 @@ def add_device():
     return render_template('add_device.html')
 # Section route (similar to login and dashboard routes)
 
+# todo rename keyword as per its use case
+# todo login check for pages
 @app.route('/device_assign')
 def device_assign():
     # Logic to assign devices to users
@@ -359,6 +361,57 @@ def close_device():
             flash('Device not found!', 'error')
 
     return redirect(url_for('dashboard'))
+
+
+@app.route('/closed_devices')
+def closed_devices():
+    # Query devices with 'Closed' status
+    closed_devices = Device.query.filter_by(assign_status='Closed').all()
+
+    # Fetch customer details for each closed device
+    device_customer_info = {}
+    for device in closed_devices:
+        customer = Customer.query.get(device.customer_id)
+        device_customer_info[device.id] = customer
+
+    return render_template('closed_devices.html', closed_devices=closed_devices,
+                           device_customer_info=device_customer_info)
+
+#todo using one field for both delivery update and expected delivery date need to change
+@app.route('/close_device_all', methods=['POST'])
+def close_device_all():
+    device_id = request.form.get('device_id')
+    bill_status = request.form.get('bill_status')
+    amount_received = request.form.get('amount_received')
+    delivery_status = request.form.get('delivery_status')
+    if delivery_status == 'true':
+        delivery_status = 'Delivered'
+    else:
+        delivery_status = 'Undelivered'
+    print("this is",delivery_status)
+    # Check if amount received is null and delivery status is unticked
+    if not amount_received and not delivery_status:
+        return jsonify({'error': 'Amount received is required and delivery status must be checked'}), 400
+
+    # Assuming you have a Device model with appropriate fields
+    device = Device.query.get(device_id)
+    if not device:
+        return jsonify({'error': 'Device not found'}), 404
+
+    # Update the device status and bill status
+    device.bill_status = bill_status
+    print(bill_status)
+    device.amount_received = amount_received
+    device.device_status = delivery_status
+    device.assign_status = delivery_status
+    # Update the expected delivery date to today's date if delivery status is checked
+    if delivery_status:
+        device.expected_delivery_date = datetime.now().date()
+
+    # Save changes to the database
+    db.session.commit()
+
+    return jsonify({'message': 'Device closed successfully'}), 200
 
 @app.route('/logout')
 @login_required

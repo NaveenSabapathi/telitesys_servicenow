@@ -45,6 +45,8 @@ class Device(db.Model):
     expected_delivery_date = db.Column(DateTime, nullable=False)
     expected_budget = db.Column(Float, nullable=False)
 
+    # delivery_status = db.Column(db.String(20), default="unpaid")
+    # todo add delivery status and delivered date
     # Define the foreign key relationship with Customer
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
 

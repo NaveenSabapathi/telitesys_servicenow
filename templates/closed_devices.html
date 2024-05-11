@@ -1,0 +1,242 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Closed Devices</title>-->
+<!--    &lt;!&ndash; Bootstrap CSS &ndash;&gt;-->
+<!--    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">-->
+<!--    &lt;!&ndash; Custom CSS &ndash;&gt;-->
+<!--    <style>-->
+<!--        /* Custom CSS styles */-->
+<!--        body {-->
+<!--            background-color: #f4f7f6; /* Light gray background */-->
+<!--            color: #333; /* Dark gray text */-->
+<!--            font-family: Arial, sans-serif; /* Font style */-->
+<!--        }-->
+<!--        .container {-->
+<!--            margin-top: 50px;-->
+<!--        }-->
+<!--        .table th, .table td {-->
+<!--            vertical-align: middle;-->
+<!--        }-->
+<!--        .table tbody tr:nth-child(even) {-->
+<!--            background-color: #e8e8e8; /* Alternate row background */-->
+<!--        }-->
+<!--        .table tbody tr:hover {-->
+<!--            background-color: #d3d3d3; /* Hover row background */-->
+<!--        }-->
+<!--        .btn-primary {-->
+<!--            background-color: #007bff; /* Blue button background */-->
+<!--            border-color: #007bff; /* Blue button border */-->
+<!--            font-weight: bold; /* Button text font weight */-->
+<!--            transition: background-color 0.3s; /* Smooth transition effect */-->
+<!--        }-->
+<!--        .btn-primary:hover {-->
+<!--            background-color: #0056b3; /* Darker blue on hover */-->
+<!--            border-color: #0056b3; /* Darker blue border on hover */-->
+<!--        }-->
+<!--        h1 {-->
+<!--            color: #007bff; /* Blue heading color */-->
+<!--            font-weight: bold; /* Heading font weight */-->
+<!--            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Heading font style */-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--    <div class="container">-->
+<!--        <h1 class="text-center mb-4">Closed Devices</h1>-->
+<!--        <table class="table table-bordered">-->
+<!--            <thead class="thead-dark">-->
+<!--                <tr>-->
+<!--                    <th>Device Name</th>-->
+<!--                    <th>Serial Number</th>-->
+<!--                    <th>Customer Name</th>-->
+<!--                    <th>Customer Phone</th>-->
+<!--                    <th>Date Received</th>-->
+<!--                    <th>Bill Value</th>-->
+<!--                    <th>Action</th>-->
+<!--                </tr>-->
+<!--            </thead>-->
+<!--            <tbody> -->
+<!--                {% for device in closed_devices %}-->
+<!--                    <tr>-->
+<!--                        <td>{{ device.device_name }}</td>-->
+<!--                        <td>{{ device.serial_number }}</td>-->
+<!--                        <td>{{ device_customer_info[device.id].name }}</td>-->
+<!--                        <td>{{ device_customer_info[device.id].whatsapp_number }}</td>-->
+<!--                         <td>{{ device.received_date }}</td>-->
+<!--                        <td>₹{{ device.bill_value }}</td>-->
+<!--                        <td>-->
+<!--                            <button type="button" class="btn btn-primary" onclick="printDevice('{{ device.id }}')">Print</button>-->
+<!--                        </td>-->
+<!--                    </tr>-->
+<!--                {% endfor %}-->
+<!--            </tbody>-->
+<!--        </table>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Bootstrap JS (Optional) &ndash;&gt;-->
+<!--    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>-->
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>-->
+<!--    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>-->
+<!--    <script>-->
+<!--        function printDevice(deviceId) {-->
+<!--            // Implement print functionality here-->
+<!--            // You can use JavaScript's window.print() function to print the device details-->
+<!--            // Example: window.print();-->
+<!--        }-->
+<!--    </script>-->
+<!--</body>-->
+<!--</html>-->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Closed Devices</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        /* Custom CSS styles */
+        body {
+            background-color: #f4f7f6; /* Light gray background */
+            color: #333; /* Dark gray text */
+            font-family: Arial, sans-serif; /* Font style */
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+        .table tbody tr:nth-child(even) {
+            background-color: #e8e8e8; /* Alternate row background */
+        }
+        .table tbody tr:hover {
+            background-color: #d3d3d3; /* Hover row background */
+        }
+        .btn-primary {
+            background-color: #007bff; /* Blue button background */
+            border-color: #007bff; /* Blue button border */
+            font-weight: bold; /* Button text font weight */
+            transition: background-color 0.3s; /* Smooth transition effect */
+        }
+        .btn-primary:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+            border-color: #0056b3; /* Darker blue border on hover */
+        }
+        h1 {
+            color: #007bff; /* Blue heading color */
+            font-weight: bold; /* Heading font weight */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Heading font style */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Closed Devices</h1>
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Device Name</th>
+                    <th>Serial Number</th>
+                    <th>Customer Name</th>
+                    <th>Customer Phone</th>
+                    <th>Bill Value</th>
+                    <th>Bill Status</th>
+                    <th>Amount Received</th>
+                    <th>Delivery Status</th>
+
+                    <th>Action</th>
+                    <th>Print</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for device in closed_devices %}
+                    <tr>
+                        <td>{{ device.device_name }}</td>
+                        <td>{{ device.serial_number }}</td>
+                        <td>{{ device_customer_info[device.id].name }}</td>
+                        <td>{{ device_customer_info[device.id].whatsapp_number }}</td>
+                        <td>₹{{ device.bill_value }}</td>
+                        <td>
+                            <select class="form-control">
+                                <option value="unpaid">Unpaid</option>
+                                <option value="paid">Paid</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="number" class="form-control" placeholder="Amount Received (₹)">
+                        </td>
+                        <td>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="deliveryStatus">
+                                <label class="form-check-label" for="deliveryStatus">
+                                    Delivered
+                                </label>
+                            </div>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-primary" onclick="closeDevice('{{ device.id }}')">Close</button>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-primary" onclick="printDevice('{{ device.id }}')">Print</button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Bootstrap JS (Optional) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function closeDevice(deviceId) {
+
+            var billStatus = $('select').val();
+            var amountReceived = $('input[type="number"]').val();
+            var deliveryStatus = $('#deliveryStatus').is(':checked');
+
+            if (!amountReceived || !deliveryStatus) {
+            alert('Please enter the amount received and mark the delivery status before closing.');
+            return; // Stop further execution
+        }
+
+            // Perform AJAX request to update device status and bill status
+            $.ajax({
+                url: '/close_device_all',
+                type: 'POST',
+                data: {
+                    device_id: deviceId,
+                    bill_status: billStatus,
+                    amount_received: amountReceived,
+                    delivery_status: deliveryStatus
+                },
+                success: function(response) {
+                    console.log('Device closed successfully');
+                    alert('Bill closed successfully');
+                    window.location.reload();
+                    // Handle success response
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error occurred:', error);
+                    // Handle error response
+                }
+            });
+        }
+        <!-- <script>-->
+<!--        function printDevice(deviceId) {-->
+<!--            // Implement print functionality here-->
+<!--            // You can use JavaScript's window.print() function to print the device details-->
+<!--            // Example: window.print();-->
+<!--        }-->
+<!--    </script> -->
+    </script>
+</body>
+</html>
