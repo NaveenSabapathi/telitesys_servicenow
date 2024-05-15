@@ -127,6 +127,69 @@ def section(section_name):
     return render_template('dashboard.html')
     pass
 
+#
+# @app.route('/listed_device', methods=['POST'])
+# def list_device():
+#     search_filter = request.form.get('device_id')
+#     customer = Customer.query.filter_by(whatsapp_number=search_filter).first()
+#     print(customer.name)
+#     if customer:
+#         devices_list = Device.query.filter_by(customer_id=customer.id).all()
+#         # devices.append(devices_list)
+#         print("change needed here")
+#         c_name = customer.name
+#         # return render_template('list_devices.html', devices=devices, c_name=c_name)
+#         for device in devices_list:
+#             print(device)
+#             return jsonify(devices={'device_name': device.device_name, 'customer_name': c_name})
+#     else:
+#         return jsonify(error='Customer not found'), 404
+#         print("no customer")
+#
+#     print("non_logic test:")
+#     # Render the template for the initial GET request
+#     # return render_template('list_devices.html', devices=devices, c_name = c_name)
+
+#
+# @app.route('/listed_device', methods=['POST'])
+# def listed_device():
+#     search_filter = request.form.get('device_id')
+#     customer = Customer.query.filter_by(whatsapp_number=search_filter).first()
+#     devices = []
+#     c_name = None  # Initializing c_name to None to prevent NameError in case customer is not found
+#     print("om")
+#     if customer:
+#         devices_list = Device.query.filter_by(customer_id=customer.id).all()
+#         devices.extend(devices_list)  # Using extend() to add items from devices_list to devices
+#         c_name = customer.name
+#         print("govindha hari gopala")
+#
+#     return render_template('list_devices.html')
+#     print("govindha hari gopala")
+#     # , devices=devices, c_name=c_name)
+
+@app.route('/listed_device', methods=['POST'])  # Corrected route name
+def list_device():
+    search_filter = request.form.get('device_id')
+    customer = Customer.query.filter_by(whatsapp_number=search_filter).first()
+    devices = []
+
+    if customer:
+        devices_list = Device.query.filter_by(customer_id=customer.id).all()
+        c_name = customer.name
+        for device in devices_list:
+            devices.append({'device_name': device.device_name, 'customer_name': c_name})
+            print("if rules")
+        return render_template('list_devices.html', devices=devices, c_name=c_name)
+    else:
+        return jsonify(error='Customer not found'), 404
+        print("else rules")
+
+        return render_template('list_devices.html', devices=devices, c_name=c_name)
+
+
+
+
 @app.route('/search_customer/<whatsapp_number>', methods=['GET'])
 def search_customer(whatsapp_number):
     customer = Customer.query.filter_by(whatsapp_number=whatsapp_number).first()

@@ -55,6 +55,15 @@
             font-size: 18px;
             margin: 0;
         }
+         .search-container {
+
+            display: flex;
+            align-items: center;
+        }
+        .form-control {
+            width: 300px;
+            margin-left : 10px;
+        }
         .progress-bar {
             display: block;
             width: 100%;
@@ -104,6 +113,14 @@
         <p>Dashboard</p>
         <button class="button" onclick="window.location.href='{{ url_for('logout') }}'">Logout</button>
         <button class="button" onclick="window.location.href='{{ url_for('add_device') }}'">Add New Device</button>
+
+        <!---------------------SEARCH FUNCTION --------------------------------------->
+<!--        <div class="search-container">-->
+<!--            <input type="text" class="form-control" id="searchInput" placeholder="Search by Customer Phone or Service ID">-->
+<!--            <button class="button" onclick="search()">Search</button>-->
+<!--        </div>-->
+
+         <!---------------------SEARCH FUNCTION --------------------------------------->
     </header>
     <div class="container">
         <section class="device-sections">
@@ -165,6 +182,47 @@
                </div>
             <!-- Add more sections here -->
         </section>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function search() {
+        var input, filter;
+
+        input = document.getElementById("searchInput");
+        filter = input.value.toUpperCase();
+
+        $.ajax({
+            url: '/listed_device',
+            type: 'POST',
+            data: { device_id: filter },
+            success: function(response) {
+               alert('no respo. Please try again later.');
+
+                console.log(response); // Log the response object to the console
+                var popupOptions = "width=800,height=600,scrollbars=yes,resizable=yes";
+                var searchUrl = '/list_devices';  // Update with the correct URL
+                var searchWindow = window.open(searchUrl, "_blank", popupOptions);
+
+                searchWindow.onload = function() {
+                    alert('Failed to fetch man. Please try again later.');
+                    response.devices.forEach(function(device) {
+                        var row = `<tr>
+                                        <td>${device.device_name}</td>
+                                        <td>${device.customer_name}</td>
+                                   </tr>`;
+                        searchWindow.document.getElementById('searchResults').getElementsByTagName('tbody')[0].innerHTML += row;
+                    });
+                };
+            },
+            error: function(xhr, status, error) {
+                console.error(error);
+                alert('Failed to fetch search ggg results. Please try again later.');
+            }
+        });
+    }
+</script>
+
+
+
         <main>
             <!-- <img src="data:image/png;base64,{{ plot_data }}" alt="Assigned Devices Count" class="plot-image"> -->
         </main>
