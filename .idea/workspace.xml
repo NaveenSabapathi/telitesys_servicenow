@@ -5,12 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9174245e-d628-4566-b313-513376855475" name="Changes" comment="almost done&#10;&#10;functional testing pending&#10;&#10;todo user layout pages and &#10;&#10;print billing pending">
-      <change afterPath="$PROJECT_DIR$/templates/list_devices.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/new_dashboard.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app_cusdata.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_cusdata.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/instance/test.db" beforeDir="false" afterPath="$PROJECT_DIR$/instance/test.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/closed_devices.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/closed_devices.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/register.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -148,7 +148,15 @@
       <option name="project" value="LOCAL" />
       <updated>1715439494405</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="almost done&#10;&#10;functional testing pending&#10;&#10;todo user layout pages and &#10;&#10;print billing pending">
+      <option name="closed" value="true" />
+      <created>1715773459072</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1715773459072</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">

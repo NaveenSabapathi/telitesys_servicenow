@@ -153,7 +153,7 @@
             <div class="device-section">
                 <a href="{{ url_for('delivery_ready') }}">
                 <h2>Unbilled Devices</h2>
-                <p>{{ delivery_ready_devices }}</p>
+                <p>{{ unbilled_devices_count }}</p>
                 <div class="progress-bar">
                     {% if assigned_devices_count + available_devices|length != 0 %}
                         <span style="width: {{ (delivery_ready_devices / (assigned_devices_count + 2 + available_devices|length)) * 100 }}%;"></span>
@@ -165,10 +165,10 @@
             </div>
             <div class="device-section">
                 <a href="{{ url_for('closed_devices') }}">
-                <h2>Pending Delivery</h2>
+                <h2>Delivery Awaiting </h2>
                 <p>{{ delivery_ready_devices }}</p>
                 <div class="progress-bar">
-                    {% if assigned_devices_count + available_devices|length != 0 %}
+                    {% if pending_delivery_count + available_devices|length != 0 %}
                         <span style="width: {{ (delivery_ready_devices / (assigned_devices_count + 2 + available_devices|length)) * 100 }}%;"></span>
                     {% else %}
                         <span style="width: 0%;"></span>
@@ -180,6 +180,12 @@
             <h2>Service Time Overlap</h2>
             <p>{{ pending_delivery_count }}</p>
                </div>
+            <div class="device-section">
+            <h2>Bill Processed Today</h2>
+            <p>{{ bill_today }}</p>
+               </div>
+
+
             <!-- Add more sections here -->
         </section>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

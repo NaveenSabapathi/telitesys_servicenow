@@ -3,15 +3,12 @@ from flask_login import LoginManager, login_user, current_user, logout_user, log
 from models import User, db, Device, Customer, SparePart, Service
 from functools import partial
 from flask_migrate import Migrate
-from flask import render_template
 from flask import jsonify
 import matplotlib
 matplotlib.use('agg')
-import matplotlib.pyplot as plt
-import io
-import base64
 from datetime import datetime
-from sqlalchemy.orm import joinedload
+
+
 
 app = Flask(__name__)
 
@@ -53,18 +50,22 @@ def login():
 # Registration route (similar to login route)
 
 @app.route('/register', methods=['GET', 'POST'])
+#todo need to find some alternate ways for setting up new users
+#ss @login_required
 def register():
-    if current_user.is_authenticated:
+    if current_user.user_level != 'admin':
+        print("yes")
         return redirect(url_for('dashboard'))
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         phone_number = request.form['phone_number']
+        user_level = request.form['user_level']
         print(phone_number)
         if User.query.filter_by(phone_number=phone_number).first():
             flash('Phone number already registered', 'error')
             return redirect(url_for('register'))
-        user = User(username=username,phone_number=phone_number)
+        user = User(username=username, phone_number=phone_number, user_level=user_level)
         user.set_password(password)  # Use set_password from User model
         db.session.add(user)
         db.session.commit()
@@ -73,6 +74,7 @@ def register():
     return render_template('register.html')
 
 @app.route('/add_spare_part', methods=['POST'])
+@login_required
 def add_spare_part():
     data = request.json
     name = data.get('name')
@@ -92,34 +94,48 @@ def add_spare_part():
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    if current_user.user_level == 'admin':
+        assigned_devices_count = Device.query.filter_by(assign_status='Assigned').count()
+        print(assigned_devices_count)
+        available_devices = Device.query.filter_by(assign_status='Assigned').all()
+        unassigned_devices_count = Device.query.filter_by(assign_status='Unassigned').count()
+        unbilled_devices_count = Device.query.filter_by(assign_status='Delivery Pending').count()
+        delivery_ready_devices = Device.query.filter_by(assign_status='Closed').count()
+        # print(delivery_ready_devices)
+        today = datetime.now().date()
+        pending_delivery_count = Device.query.filter(Device.expected_delivery_date < today).count()
+        pending_bill_amount = bill_today()
+        return render_template('dashboard.html', assigned_devices_count=assigned_devices_count,available_devices=available_devices,pending_delivery_count=pending_delivery_count,unbilled_devices_count=unbilled_devices_count,unassigned_devices_count=unassigned_devices_count, delivery_ready_devices=delivery_ready_devices, bill_today = pending_bill_amount )
+        # plot_data=plot_data)
+    else:
+        assigned_devices_count = Device.query.filter_by(assigned_to=current_user.id).count()
+        available_devices = Device.query.filter_by(assign_status='Assigned').all()
+        unassigned_devices_count = 0
+        unbilled_devices_count = 0
+        delivery_ready_devices = Device.query.filter_by(assign_status='Closed').count()
+        today = datetime.now().date()
+        pending_delivery_count = Device.query.filter(Device.expected_delivery_date < today).count()
+        pending_bill_amount = 0
 
-    assigned_devices_count = Device.query.filter_by(assign_status='Assigned').count()
-    available_devices = Device.query.filter_by(assign_status='Assigned').all()
-    unassigned_devices_count = Device.query.filter_by(assign_status='Unassigned').count()
-    delivery_ready_devices = Device.query.filter_by(assign_status='Delivery Pending').count()
+        return render_template('dashboard.html', assigned_devices_count=assigned_devices_count,available_devices=available_devices,pending_delivery_count=pending_delivery_count,unbilled_devices_count=unbilled_devices_count,unassigned_devices_count=unassigned_devices_count, delivery_ready_devices=delivery_ready_devices, bill_today = pending_bill_amount )
+
+
+
+def bill_today():
     today = datetime.now().date()
-    pending_delivery_count = Device.query.filter(Device.expected_delivery_date < today).count()
+    service_done = Device.query.filter_by(assign_status='Delivered').all()
+    # print(service_done)
+    bill_amount = 0
 
-    # Matplotlib bar chart
-    # plt.figure(figsize=(8, 6))
-    # plt.bar(['Assigned Devices'], [assigned_devices_count], color='skyblue')
-    # plt.xlabel('Device Status')
-    # plt.ylabel('Count')
-    # plt.title('Assigned Devices Count')
-    # plt.grid(True)
+    for service in service_done:
+        process_date = service.expected_delivery_date.date()
+        # print("process,",process_date)
+        # print("today =", today)
+        if process_date == today:
+            # print("processed today",service.bill_value)
+            bill_amount += service.bill_value
+    return bill_amount
 
-    # Convert the plot to HTML format
-    # buffer = io.BytesIO()
-    # plt.savefig(buffer, format='png')
-    # buffer.seek(0)
-    # plot_data = base64.b64encode(buffer.getvalue()).decode()
-    # plt.close()
-
-    return render_template('dashboard.html', assigned_devices_count=assigned_devices_count,pending_delivery_count=pending_delivery_count,unassigned_devices_count=unassigned_devices_count, delivery_ready_devices=delivery_ready_devices, )
-    # plot_data=plot_data)
-
-
-    # return render_template('dashboard.html', list_data=device_data, safe_sum=safe_sum)
 
 @app.route('/section/<section_name>')
 def section(section_name):
@@ -127,48 +143,8 @@ def section(section_name):
     return render_template('dashboard.html')
     pass
 
-#
-# @app.route('/listed_device', methods=['POST'])
-# def list_device():
-#     search_filter = request.form.get('device_id')
-#     customer = Customer.query.filter_by(whatsapp_number=search_filter).first()
-#     print(customer.name)
-#     if customer:
-#         devices_list = Device.query.filter_by(customer_id=customer.id).all()
-#         # devices.append(devices_list)
-#         print("change needed here")
-#         c_name = customer.name
-#         # return render_template('list_devices.html', devices=devices, c_name=c_name)
-#         for device in devices_list:
-#             print(device)
-#             return jsonify(devices={'device_name': device.device_name, 'customer_name': c_name})
-#     else:
-#         return jsonify(error='Customer not found'), 404
-#         print("no customer")
-#
-#     print("non_logic test:")
-#     # Render the template for the initial GET request
-#     # return render_template('list_devices.html', devices=devices, c_name = c_name)
-
-#
-# @app.route('/listed_device', methods=['POST'])
-# def listed_device():
-#     search_filter = request.form.get('device_id')
-#     customer = Customer.query.filter_by(whatsapp_number=search_filter).first()
-#     devices = []
-#     c_name = None  # Initializing c_name to None to prevent NameError in case customer is not found
-#     print("om")
-#     if customer:
-#         devices_list = Device.query.filter_by(customer_id=customer.id).all()
-#         devices.extend(devices_list)  # Using extend() to add items from devices_list to devices
-#         c_name = customer.name
-#         print("govindha hari gopala")
-#
-#     return render_template('list_devices.html')
-#     print("govindha hari gopala")
-#     # , devices=devices, c_name=c_name)
-
 @app.route('/listed_device', methods=['POST'])  # Corrected route name
+@login_required
 def list_device():
     search_filter = request.form.get('device_id')
     customer = Customer.query.filter_by(whatsapp_number=search_filter).first()
@@ -179,18 +155,18 @@ def list_device():
         c_name = customer.name
         for device in devices_list:
             devices.append({'device_name': device.device_name, 'customer_name': c_name})
-            print("if rules")
+            # print("if rules")
         return render_template('list_devices.html', devices=devices, c_name=c_name)
     else:
         return jsonify(error='Customer not found'), 404
-        print("else rules")
 
-        return render_template('list_devices.html', devices=devices, c_name=c_name)
+    return render_template('list_devices.html', devices=devices, c_name=c_name)
 
 
 
 
 @app.route('/search_customer/<whatsapp_number>', methods=['GET'])
+@login_required
 def search_customer(whatsapp_number):
     customer = Customer.query.filter_by(whatsapp_number=whatsapp_number).first()
     if customer:
@@ -272,6 +248,9 @@ def add_device():
         db.session.add(new_device)
         db.session.commit()
 
+        # whatsapp_message_body = f"New device added:\nDevice Type: {device_type}\nDevice Name: {device_name}\nModel: {model}\nSerial Number: {serial_number}\nIssue Description: {issue_description}\nDevice Status: {device_status}\nRemark: {remark}\nReceived Date: {received_date}\nExpected Delivery Date: {expected_delivery_date}\nExpected Budget: {expected_budget}"
+        # send_whatsapp_message(whatsapp_number, whatsapp_message_body)
+
         flash('Device added successfully!', 'success')
         return redirect(url_for('dashboard'))
 
@@ -281,12 +260,17 @@ def add_device():
 
 # todo rename keyword as per its use case
 # todo login check for pages
+
+
+####################################SECTION WHERE ADMIN ASSIGN THE UNASSIGNED DEVICES TO SERVICE TEAM#######################################
 @app.route('/device_assign')
+@login_required
 def device_assign():
-    # Logic to assign devices to users
-
-
+    if current_user.user_level != "admin":
+        return redirect(url_for('dashboard'))
     unassigned_devices = Device.query.filter_by(assign_status='Unassigned').all()
+    if not unassigned_devices:
+        return redirect(url_for('dashboard'))
     print(type(unassigned_devices))
     if unassigned_devices != []:
         cus = []
@@ -297,8 +281,7 @@ def device_assign():
     else:
         return redirect(url_for('dashboard'))
 
-
-    user = User.query.filter_by(user_level="admin").all()
+    user = User.query.all()
     return render_template('device_assign.html',  unassigned_devices = unassigned_devices, available_users = user, customer = cus)
 
 # @app.route('/delivery_ready')
@@ -322,26 +305,32 @@ def device_assign():
 #
 #     return render_template('delivery_ready.html', delivery_devices=delivery_devices, device_service_info=service_id)
 
+
 @app.route('/delivery_ready')
+@login_required
 def delivery_ready():
-    # Query devices with delivery pending status
-    delivery_devices = Device.query.filter_by(assign_status='Delivery Pending').all()
-    if not delivery_devices:
-        return redirect(url_for('dashboard'))
+    if current_user.user_level == 'admin':
+        delivery_devices = Device.query.filter_by(assign_status='Delivery Pending').all()
+        if not delivery_devices:
+            return redirect(url_for('dashboard'))
 
-    device_service_info = {}
-    for device in delivery_devices:
-        s_id = device.service_id
-        # Query spare parts for each device
-        service_parts = SparePart.query.filter_by(service_id=s_id).all()
-        device_service_info[s_id] = service_parts
+        device_service_info = {}
+        for device in delivery_devices:
+            s_id = device.service_id
+            # Query spare parts for each device
+            service_parts = SparePart.query.filter_by(service_id=s_id).all()
+            device_service_info[s_id] = service_parts
 
-    return render_template('delivery_ready.html', delivery_devices=delivery_devices,
+        return render_template('delivery_ready.html', delivery_devices=delivery_devices,
                            device_service_info=device_service_info)
+    return redirect(url_for('dashboard'))
+
 
 
 @app.route('/assigning_devices', methods=['POST'])
+@login_required
 def assigning_devices():
+
     if request.method == 'POST':
         device_id = request.form['device_id']
         user_id = request.form['user_id']
@@ -377,12 +366,19 @@ def service(device_id):
 def assigned_devices():
     # Fetch assigned devices from the database (you need to implement this logic)
     #todo Assigned --> capital and small cases based key value error recovery needed
-    assigned_devices = Device.query.filter_by(assign_status='Assigned').all()
+
+    if current_user.user_level != 'admin':
+        assigned_devices = Device.query.filter_by(assigned_to=current_user.id).all()
+    if current_user.user_level == 'admin':
+        assigned_devices = Device.query.filter_by(assign_status='Assigned').all()
+    if not assigned_devices:
+        return redirect(url_for('dashboard'))
     return render_template('assigned_devices.html', assigned_devices=assigned_devices)
 
 
 
 @app.route('/finish_service', methods=['POST'])
+@login_required
 def finish_service():
     if request.method == 'POST':
         device_id = request.form['device_id']
@@ -404,56 +400,101 @@ def finish_service():
 
 
 @app.route('/close_device', methods=['POST'])
+@login_required
 def close_device():
-    print("stated close waiting")
-    if request.method == 'POST':
-        device_id = request.form['device_id']
-        print("device_id is:",device_id)
-        bill_value = request.form['bill_value']
-        print("user is:", device_id)
-        # Retrieve the device from the database
-        device = Device.query.get(device_id)
-        if device:
-            # Update the assigned_to column with the selected user_id
-            device.bill_value = bill_value
-            device.assign_status = "Closed"
-            device.device_status = "Ready"
-            db.session.commit()
-            flash('Device State Updated successfully!', 'success')
-        else:
-            flash('Device not found!', 'error')
+    if current_user.user_level == 'admin':
+        print("stated close waiting")
+        if request.method == 'POST':
+            device_id = request.form['device_id']
+            print("device_id is:",device_id)
+            bill_value = request.form['bill_value']
+            print("user is:", device_id)
+            # Retrieve the device from the database
+            device = Device.query.get(device_id)
+            if device:
+                # Update the assigned_to column with the selected user_id
+                device.bill_value = bill_value
+                device.assign_status = "Closed"
+                device.device_status = "Ready"
+                db.session.commit()
+                flash('Device State Updated successfully!', 'success')
+            else:
+                flash('Device not found!', 'error')
 
+        return redirect(url_for('dashboard'))
     return redirect(url_for('dashboard'))
 
 
+
 @app.route('/closed_devices')
+@login_required
 def closed_devices():
-    # Query devices with 'Closed' status
-    closed_devices = Device.query.filter_by(assign_status='Closed').all()
 
-    # Fetch customer details for each closed device
-    device_customer_info = {}
-    for device in closed_devices:
-        customer = Customer.query.get(device.customer_id)
-        device_customer_info[device.id] = customer
+    if current_user.user_level !='staff':
+        # Query devices with 'Closed' status
+        closed_devices = Device.query.filter_by(assign_status='Closed').all()
 
-    return render_template('closed_devices.html', closed_devices=closed_devices,
-                           device_customer_info=device_customer_info)
+        # Fetch customer details for each closed device
+        device_customer_info = {}
+        for device in closed_devices:
+            customer = Customer.query.get(device.customer_id)
+            device_customer_info[device.id] = customer
+
+        return render_template('closed_devices.html', closed_devices=closed_devices,
+                               device_customer_info=device_customer_info)
+    return redirect(url_for('dashboard'))
 
 #todo using one field for both delivery update and expected delivery date need to change
+# @app.route('/close_device_all', methods=['POST'])
+# def close_device_all():
+#     device_id = request.form.get('device_id')
+#     bill_status = request.form.get('bill_status')
+#     amount_received = request.form.get('amount_received')
+#     delivery_status = request.form.get('delivery_status')
+#     if delivery_status == 'true':
+#         delivery_status = 'Delivered'
+#     else:
+#         delivery_status = 'Undelivered'
+#     print("this is",delivery_status)
+#     # Check if amount received is null and delivery status is unticked
+#     if not amount_received and not delivery_status:
+#         return jsonify({'error': 'Amount received is required and delivery status must be checked'}), 400
+#
+#     # Assuming you have a Device model with appropriate fields
+#     device = Device.query.get(device_id)
+#     if not device:
+#         return jsonify({'error': 'Device not found'}), 404
+#
+#     # Update the device status and bill status
+#     device.bill_status = bill_status
+#     print(bill_status)
+#     device.amount_received = amount_received
+#     device.device_status = delivery_status
+#     device.assign_status = delivery_status
+#     # Update the expected delivery date to today's date if delivery status is checked
+#     if delivery_status:
+#         device.expected_delivery_date = datetime.now().date()
+#
+#     # Save changes to the database
+#     db.session.commit()
+#
+#     return jsonify({'message': 'Device closed successfully'}), 200
+
 @app.route('/close_device_all', methods=['POST'])
+@login_required
 def close_device_all():
     device_id = request.form.get('device_id')
     bill_status = request.form.get('bill_status')
     amount_received = request.form.get('amount_received')
     delivery_status = request.form.get('delivery_status')
+
     if delivery_status == 'true':
         delivery_status = 'Delivered'
     else:
         delivery_status = 'Undelivered'
-    print("this is",delivery_status)
+
     # Check if amount received is null and delivery status is unticked
-    if not amount_received and not delivery_status:
+    if not amount_received and delivery_status != 'Delivered':
         return jsonify({'error': 'Amount received is required and delivery status must be checked'}), 400
 
     # Assuming you have a Device model with appropriate fields
@@ -463,18 +504,18 @@ def close_device_all():
 
     # Update the device status and bill status
     device.bill_status = bill_status
-    print(bill_status)
     device.amount_received = amount_received
     device.device_status = delivery_status
     device.assign_status = delivery_status
     # Update the expected delivery date to today's date if delivery status is checked
-    if delivery_status:
+    if delivery_status == 'Delivered':
         device.expected_delivery_date = datetime.now().date()
 
     # Save changes to the database
     db.session.commit()
 
     return jsonify({'message': 'Device closed successfully'}), 200
+
 
 @app.route('/logout')
 @login_required
