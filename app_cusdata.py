@@ -8,8 +8,6 @@ import matplotlib
 matplotlib.use('agg')
 from datetime import datetime
 
-
-
 app = Flask(__name__)
 
 # Replace with a strong secret key for production
@@ -17,6 +15,8 @@ app.config['SECRET_KEY'] = 'your_strong_secret_key'
 
 # Adjust database URI as needed. Consider using an environment variable.
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'  # Or other database connection details
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:12345@localhost/breezedb'
+
 
 db.init_app(app)
 
@@ -53,8 +53,14 @@ def login():
 #todo need to find some alternate ways for setting up new users
 #ss @login_required
 def register():
-    if current_user.user_level != 'admin':
-        print("yes")
+    #todo need to setup  so if theres no registered user in db, i will redirect to registration page ,
+    # or else it will pop up ask admin account to create a login with admin names
+    if User.query.first() is not None:
+        print("Need to create a account")
+    else:
+        print("GO HERE")
+        if current_user.user_level != 'admin':
+            print("yes")
         return redirect(url_for('dashboard'))
     if request.method == 'POST':
         username = request.form['username']
@@ -251,8 +257,10 @@ def add_device():
         # whatsapp_message_body = f"New device added:\nDevice Type: {device_type}\nDevice Name: {device_name}\nModel: {model}\nSerial Number: {serial_number}\nIssue Description: {issue_description}\nDevice Status: {device_status}\nRemark: {remark}\nReceived Date: {received_date}\nExpected Delivery Date: {expected_delivery_date}\nExpected Budget: {expected_budget}"
         # send_whatsapp_message(whatsapp_number, whatsapp_message_body)
 
+        # flash('Device added successfully!', 'success')
+        # return redirect(url_for('dashboard'))
         flash('Device added successfully!', 'success')
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('ack_ticket', device_id=new_device.id))
 
     # If the request method is GET, render the add_device template
     return render_template('add_device.html')
@@ -260,6 +268,19 @@ def add_device():
 
 # todo rename keyword as per its use case
 # todo login check for pages
+###################################################Print ack#########################
+
+@app.route('/ack_ticket/<int:device_id>')
+@login_required
+def ack_ticket(device_id):
+    device = Device.query.get_or_404(device_id)
+    customer = Customer.query.get_or_404(device.customer_id)
+    return render_template('ack_ticket.html', device=device, customer=customer)
+
+
+
+######################################################################
+
 
 
 ####################################SECTION WHERE ADMIN ASSIGN THE UNASSIGNED DEVICES TO SERVICE TEAM#######################################

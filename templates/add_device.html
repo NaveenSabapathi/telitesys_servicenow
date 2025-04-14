@@ -1,117 +1,122 @@
+{% extends "base.html" %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Device</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-    <div class="container">
-        <h1>Add Device</h1>
-        <form action="{{ url_for('add_device') }}" method="POST" class="form">
-            <div class="form-group">
-                <label for="whatsapp_number">WhatsApp Number</label>
+{% block title %}Add Device{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Add Device</h1>
+    <form action="{{ url_for('add_device') }}" method="POST" class="form">
+        <div class="form-group">
+            <label for="whatsapp_number">WhatsApp Number</label>
+            <div class="input-group">
                 <input type="text" id="whatsapp_number" name="whatsapp_number" class="form-control" required>
-                <button type="button" onclick="searchCustomer()" class="btn btn-primary">Search</button>
-            </div>
-            <div id="customer_details" >
-                <div class="form-group">
-                    <label for="customer_name">Customer Name</label>
-                    <input type="text" id="customer_name" name="customer_name" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label for="location">Location</label>
-                    <input type="text" id="location" name="location" class="form-control" required>
+                <div class="input-group-append">
+                    <button type="button" onclick="searchCustomer()" class="btn btn-primary">Search</button>
                 </div>
             </div>
+        </div>
+
+        <div id="customer_details">
             <div class="form-group">
-                <label for="device_type">Device Type</label>
-                <select id="device_type" name="device_type" class="form-control" required>
-                    <option value="Laptop">Laptop</option>
-                    <option value="Desktop">Desktop</option>
-                    <option value="Printer">Printer</option>
-                    <option value="Other">Other</option>
-                </select>
+                <label for="customer_name">Customer Name</label>
+                <input type="text" id="customer_name" name="customer_name" class="form-control" required>
             </div>
             <div class="form-group">
-                <label for="device_name">Device Name</label>
-                <input type="text" id="device_name" name="device_name" class="form-control" required>
+                <label for="location">Location</label>
+                <input type="text" id="location" name="location" class="form-control" required>
             </div>
-            <div class="form-group">
-                <label for="model">Model</label>
-                <input type="text" id="model" name="model" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="serial_number">Serial Number</label>
-                <input type="text" id="serial_number" name="serial_number" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="issue_description">Issue Description</label>
-                <textarea id="issue_description" name="issue_description" rows="4" class="form-control" required></textarea>
-            </div>
-            <div class="form-group">
-                <label for="device_status">Device Condition</label>
-                <select id="device_status" name="device_status" class="form-control" required>
-                    <option value="partial">Partial Working</option>
-                    <option value="No_power_on">No_power_on</option>
-                    <option value="Under Repair">Under Repair</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="remark">Remark</label>
-                <textarea id="remark" name="remark" rows="4" class="form-control"></textarea>
-            </div>
-            <div class="form-group">
-                <label for="received_date">Received Date</label>
-                <input type="date" id="received_date" name="received_date" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="expected_delivery_date">Expected Delivery Date</label>
-                <input type="date" id="expected_delivery_date" name="expected_delivery_date" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="expected_budget">Expected Budget</label>
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">₹</span>
-                    </div>
-                    <input type="number" id="expected_budget" name="expected_budget" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="device_type">Device Type</label>
+            <select id="device_type" name="device_type" class="form-control" required>
+                <option value="Laptop">Laptop</option>
+                <option value="Desktop">Desktop</option>
+                <option value="Printer">Printer</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="device_name">Device Name</label>
+            <input type="text" id="device_name" name="device_name" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="model">Model</label>
+            <input type="text" id="model" name="model" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="serial_number">Serial Number</label>
+            <input type="text" id="serial_number" name="serial_number" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="issue_description">Issue Description</label>
+            <textarea id="issue_description" name="issue_description" rows="4" class="form-control" required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="device_status">Device Condition</label>
+            <select id="device_status" name="device_status" class="form-control" required>
+                <option value="partial">Partial Working</option>
+                <option value="No_power_on">No Power On</option>
+                <option value="Under Repair">Under Repair</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="remark">Remark</label>
+            <textarea id="remark" name="remark" rows="4" class="form-control"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="received_date">Received Date</label>
+            <input type="date" id="received_date" name="received_date" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="expected_delivery_date">Expected Delivery Date</label>
+            <input type="date" id="expected_delivery_date" name="expected_delivery_date" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="expected_budget">Expected Budget</label>
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">₹</span>
                 </div>
+                <input type="number" id="expected_budget" name="expected_budget" class="form-control" required>
             </div>
-            <button type="submit" class="btn btn-primary btn-block">Add Device</button>
-        </form>
-    </div>
+        </div>
 
-    <!-- JavaScript for searching customer details -->
-    <script>
-        function searchCustomer() {
-            var whatsappNumber = document.getElementById('whatsapp_number').value;
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', '/search_customer/' + whatsappNumber, true);
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    var response = JSON.parse(xhr.responseText);
-                    if (response.error) {
-                        // Customer not found, clear previous customer details
-                        document.getElementById('customer_name').value = '';
-                        document.getElementById('location').value = '';
-                        document.getElementById('customer_details').style.display = 'block';
+        <button type="submit" class="btn btn-primary btn-block">Add Device</button>
+    </form>
+</div>
+{% endblock %}
 
-                    } else {
-                        // Customer found, populate customer details
-                        document.getElementById('customer_name').value = response.name;
-                        document.getElementById('location').value = response.location;
-                        document.getElementById('customer_details').style.display = 'block';
-
-
-                    }
+{% block scripts %}
+<script>
+    function searchCustomer() {
+        var whatsappNumber = document.getElementById('whatsapp_number').value;
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/search_customer/' + whatsappNumber, true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                var response = JSON.parse(xhr.responseText);
+                if (response.error) {
+                    document.getElementById('customer_name').value = '';
+                    document.getElementById('location').value = '';
+                    document.getElementById('customer_details').style.display = 'block';
+                } else {
+                    document.getElementById('customer_name').value = response.name;
+                    document.getElementById('location').value = response.location;
+                    document.getElementById('customer_details').style.display = 'block';
                 }
-            };
-            xhr.send();
-        }
-    </script>
-</body>
-</html>
+            }
+        };
+        xhr.send();
+    }
+</script>
+{% endblock %}

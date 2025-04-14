@@ -10,7 +10,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_strong_secret_key'
 
 # Adjust database URI as needed. Consider using an environment variable.
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users1.db'  # Or other database connection details
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users1.db'  # Or other database connection details
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:12345@localhost/breezedb'
 
 db.init_app(app)
 

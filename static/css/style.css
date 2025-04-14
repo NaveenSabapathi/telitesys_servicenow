@@ -96,3 +96,124 @@ label {
     display: block;
     margin-bottom: 5px;
     font-
+
+/* General Body Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa; /* Light gray background */
+    padding-top: 70px; /* Adjust based on fixed navbar height */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Navbar Customizations */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+.navbar-brand span {
+    font-weight: 500;
+}
+
+.navbar-logo {
+    height: 35px; /* Adjust logo height */
+    margin-right: 10px;
+}
+
+.nav-link {
+    font-weight: 500;
+}
+
+/* Main Content Area */
+.content-container {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    flex-grow: 1; /* Makes the main content area expand */
+}
+
+/* Dashboard Section Styles */
+.device-sections {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Space between cards */
+    justify-content: center; /* Center sections if they don't fill the row */
+}
+
+.device-section {
+    background-color: #ffffff; /* White background for cards */
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    flex: 1 1 300px; /* Flex properties: grow, shrink, basis */
+    max-width: 350px; /* Optional: prevent cards from becoming too wide */
+    text-align: center;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    display: block; /* Make the whole section behave like a block */
+    color: inherit; /* Inherit text color for link */
+    text-decoration: none; /* Remove underline from link */
+}
+
+.device-section:hover {
+    transform: translateY(-5px); /* Lift effect on hover */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    text-decoration: none; /* Ensure no underline on hover */
+    color: inherit; /* Keep text color consistent on hover */
+}
+
+.device-section h2 {
+    font-size: 1.1rem; /* Slightly smaller heading */
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #343a40; /* Dark gray heading */
+}
+
+.device-section p {
+    font-size: 1.75rem; /* Larger count display */
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #007bff; /* Bootstrap primary blue */
+}
+
+/* Progress Bar Styles */
+.progress {
+    height: 8px; /* Slimmer progress bar */
+    border-radius: 4px;
+    background-color: #e9ecef; /* Lighter background for progress bar */
+    overflow: hidden;
+}
+
+.progress-bar {
+    background-color: #28a745; /* Consistent green */
+     /* Remove display:block and other styles handled by Bootstrap */
+     /* Width is set inline via Jinja */
+}
+
+.navbar-logo {
+    height: 35px; /* Adjust logo height */
+    margin-right: 10px;
+    /* Width will scale automatically based on height */
+    /* Add width: auto; for clarity if needed */
+    width: auto;
+}
+
+/* Utility Classes */
+.btn-custom {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: #fff;
+    border-radius: 6px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.btn-custom:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+    color: #fff;
+}
+
+/* Footer */
+footer {
+    padding: 15px 0;
+    font-size: 0.9em;
+}

@@ -1,237 +1,115 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            background-color: #333;
-            color: #fff;
-            padding: 20px;
-            text-align: center;
-        }
-        header h1 {
-            margin: 0;
-            font-size: 24px;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 0 20px;
-        }
-        .device-sections {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            gap: 20px;
-        }
-        .device-section {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            flex-basis: calc(33.333% - 20px);
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        .device-section:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .device-section h2 {
-            margin: 0;
-            font-size: 20px;
-            margin-bottom: 10px;
-        }
-        .device-section p {
-            font-size: 18px;
-            margin: 0;
-        }
-         .search-container {
+{% extends "base.html" %}
 
-            display: flex;
-            align-items: center;
-        }
-        .form-control {
-            width: 300px;
-            margin-left : 10px;
-        }
-        .progress-bar {
-            display: block;
-            width: 100%;
-            height: 12px;
-            background-color: #f0f0f0;
-            border-radius: 8px;
-            margin-top: 10px;
-            overflow: hidden;
-        }
-        .progress-bar span {
-            display: block;
-            height: 100%;
-            background-color: #4caf50;
-        }
-        main {
-            margin-top: 20px;
-        }
-        .plot-image {
-            max-width: 100%;
-            display: block;
-            margin: 20px auto;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 15px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            transition-duration: 0.4s;
-        }
-        .button:hover {
-            background-color: #45a049;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <h1>Welcome, {{ current_user.username }}</h1>
-        <p>Dashboard</p>
-        <button class="button" onclick="window.location.href='{{ url_for('logout') }}'">Logout</button>
-        <button class="button" onclick="window.location.href='{{ url_for('add_device') }}'">Add New Device</button>
+{% block title %}Dashboard - Breeze Computers{% endblock %}
 
-        <!---------------------SEARCH FUNCTION --------------------------------------->
-<!--        <div class="search-container">-->
-<!--            <input type="text" class="form-control" id="searchInput" placeholder="Search by Customer Phone or Service ID">-->
-<!--            <button class="button" onclick="search()">Search</button>-->
-<!--        </div>-->
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Device Overview</h1>
 
-         <!---------------------SEARCH FUNCTION --------------------------------------->
-    </header>
-    <div class="container">
-        <section class="device-sections">
-            <div class="device-section" >
-               <a href="{{ url_for('assigned_devices') }}">
-                <h2>Assigned Devices</h2>
-                <p>{{ assigned_devices_count }}</p>
-                <div class="progress-bar">
-                    {% if assigned_devices_count + available_devices|length != 0 %}
-                        <span style="width: {{ (assigned_devices_count / (assigned_devices_count + available_devices|length)) * 100 }}%;"></span>
-                    {% else %}
-                        <span style="width: 0%;"></span>
-                    {% endif %}
+    <div class="row g-4">
+        <!-- Assigned Devices -->
+        <div class="col-md-4">
+            <a href="{{ url_for('assigned_devices') }}" class="text-decoration-none text-dark">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Assigned Devices</h5>
+                        <p class="display-6">{{ assigned_devices_count }}</p>
+                        {% set total_assigned_pool = assigned_devices_count + unassigned_devices_count %}
+                        <div class="progress">
+                            <div class="progress-bar bg-success" role="progressbar"
+                                 style="width: {% if total_assigned_pool > 0 %}{{ (assigned_devices_count / total_assigned_pool) * 100 }}{% else %}0{% endif %}%"
+                                 aria-valuenow="{{ (assigned_devices_count / total_assigned_pool) * 100 if total_assigned_pool > 0 else 0 }}"
+                                 aria-valuemin="0" aria-valuemax="100">
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                </a>
-            </div>
-            <div class="device-section">
-                 <a href="{{ url_for('device_assign') }}">
-                <h2>Unassigned Devices</h2>
-                <p>{{ unassigned_devices_count }}</p>
-                <div class="progress-bar">
-                    {% if unassigned_devices_count + available_devices|length != 0 %}
-                        <span style="width: {{ (unassigned_devices_count / (unassigned_devices_count + available_devices|length)) * 100 }}%;"></span>
-                    {% else %}
-                        <span style="width: 0%;"></span>
-                    {% endif %}
+            </a>
+        </div>
+
+        <!-- Unassigned Devices -->
+        <div class="col-md-4">
+            <a href="{{ url_for('device_assign') }}" class="text-decoration-none text-dark">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Unassigned Devices</h5>
+                        <p class="display-6">{{ unassigned_devices_count }}</p>
+                        <div class="progress">
+                            <div class="progress-bar bg-info" role="progressbar"
+                                 style="width: {% if total_assigned_pool > 0 %}{{ (unassigned_devices_count / total_assigned_pool) * 100 }}{% else %}0{% endif %}%"
+                                 aria-valuenow="{{ (unassigned_devices_count / total_assigned_pool) * 100 if total_assigned_pool > 0 else 0 }}"
+                                 aria-valuemin="0" aria-valuemax="100">
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                 </a>
-            </div>
-            <div class="device-section">
-                <a href="{{ url_for('delivery_ready') }}">
-                <h2>Unbilled Devices</h2>
-                <p>{{ unbilled_devices_count }}</p>
-                <div class="progress-bar">
-                    {% if assigned_devices_count + available_devices|length != 0 %}
-                        <span style="width: {{ (delivery_ready_devices / (assigned_devices_count + 2 + available_devices|length)) * 100 }}%;"></span>
-                    {% else %}
-                        <span style="width: 0%;"></span>
-                    {% endif %}
+            </a>
+        </div>
+
+        <!-- Unbilled Devices -->
+        <div class="col-md-4">
+            <a href="{{ url_for('delivery_ready') }}" class="text-decoration-none text-dark">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Unbilled Devices</h5>
+                        <p class="display-6">{{ unbilled_devices_count }}</p>
+                        {% set total_billing_pool = unbilled_devices_count + delivery_ready_devices %}
+                        <div class="progress">
+                            <div class="progress-bar bg-warning" role="progressbar"
+                                 style="width: {% if total_billing_pool > 0 %}{{ (unbilled_devices_count / total_billing_pool) * 100 }}{% else %}0{% endif %}%"
+                                 aria-valuenow="{{ (unbilled_devices_count / total_billing_pool) * 100 if total_billing_pool > 0 else 0 }}"
+                                 aria-valuemin="0" aria-valuemax="100">
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                </a>
-            </div>
-            <div class="device-section">
-                <a href="{{ url_for('closed_devices') }}">
-                <h2>Delivery Awaiting </h2>
-                <p>{{ delivery_ready_devices }}</p>
-                <div class="progress-bar">
-                    {% if pending_delivery_count + available_devices|length != 0 %}
-                        <span style="width: {{ (delivery_ready_devices / (assigned_devices_count + 2 + available_devices|length)) * 100 }}%;"></span>
-                    {% else %}
-                        <span style="width: 0%;"></span>
-                    {% endif %}
+            </a>
+        </div>
+
+        <!-- Delivery Awaiting -->
+        <div class="col-md-4">
+            <a href="{{ url_for('closed_devices') }}" class="text-decoration-none text-dark">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Delivery Awaiting</h5>
+                        <p class="display-6">{{ delivery_ready_devices }}</p>
+                        <div class="progress">
+                            <div class="progress-bar bg-danger" role="progressbar"
+                                 style="width: {% if total_billing_pool > 0 %}{{ (delivery_ready_devices / total_billing_pool) * 100 }}{% else %}0{% endif %}%"
+                                 aria-valuenow="{{ (delivery_ready_devices / total_billing_pool) * 100 if total_billing_pool > 0 else 0 }}"
+                                 aria-valuemin="0" aria-valuemax="100">
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                </a>
+            </a>
+        </div>
+
+        <!-- Service Time Overlap -->
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Service Time Overlap</h5>
+                    <p class="display-6">{{ pending_delivery_count }}</p>
+                </div>
             </div>
-             <div class="device-section">
-            <h2>Service Time Overlap</h2>
-            <p>{{ pending_delivery_count }}</p>
-               </div>
-            <div class="device-section">
-            <h2>Bill Processed Today</h2>
-            <p>{{ bill_today }}</p>
-               </div>
+        </div>
 
-
-            <!-- Add more sections here -->
-        </section>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    function search() {
-        var input, filter;
-
-        input = document.getElementById("searchInput");
-        filter = input.value.toUpperCase();
-
-        $.ajax({
-            url: '/listed_device',
-            type: 'POST',
-            data: { device_id: filter },
-            success: function(response) {
-               alert('no respo. Please try again later.');
-
-                console.log(response); // Log the response object to the console
-                var popupOptions = "width=800,height=600,scrollbars=yes,resizable=yes";
-                var searchUrl = '/list_devices';  // Update with the correct URL
-                var searchWindow = window.open(searchUrl, "_blank", popupOptions);
-
-                searchWindow.onload = function() {
-                    alert('Failed to fetch man. Please try again later.');
-                    response.devices.forEach(function(device) {
-                        var row = `<tr>
-                                        <td>${device.device_name}</td>
-                                        <td>${device.customer_name}</td>
-                                   </tr>`;
-                        searchWindow.document.getElementById('searchResults').getElementsByTagName('tbody')[0].innerHTML += row;
-                    });
-                };
-            },
-            error: function(xhr, status, error) {
-                console.error(error);
-                alert('Failed to fetch search ggg results. Please try again later.');
-            }
-        });
-    }
-</script>
-
-
-
-        <main>
-            <!-- <img src="data:image/png;base64,{{ plot_data }}" alt="Assigned Devices Count" class="plot-image"> -->
-        </main>
+        <!-- Bill Processed Today -->
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Bill Processed Today</h5>
+                    <p class="display-6">{{ bill_today }}</p>
+                </div>
+            </div>
+        </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    console.log("Dashboard page loaded.");
+</script>
+{% endblock %}

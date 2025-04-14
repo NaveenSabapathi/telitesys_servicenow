@@ -5,22 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
+        <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
         }
-        header {
+        .navbar-custom {
             background-color: #333;
-            color: #fff;
-            padding: 20px;
-            text-align: center;
+            padding: 10px 20px;
         }
-        header h1 {
-            margin: 0;
-            font-size: 24px;
+        .navbar-custom .navbar-brand,
+        .navbar-custom .nav-link,
+        .navbar-custom .btn {
+            color: #fff;
+        }
+        .navbar-custom .btn:hover {
+            background-color: #555;
+            color: #fff;
         }
         .container {
             max-width: 1200px;
@@ -42,9 +43,6 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
             font-size: 16px;
             transition-duration: 0.4s;
         }
@@ -62,9 +60,21 @@
     </style>
 </head>
 <body>
+     <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+        <div class="ml-auto">
+            <span class="navbar-text mr-3">Welcome, {{ current_user.username }}</span>
+            <a href="{{ url_for('add_device') }}" class="btn btn-sm btn-success mr-2">Add New Device</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-sm btn-danger">Logout</a>
+        </div>
+    </nav>
     <header>
         <h1>Welcome, {{ current_user.username }}</h1>
         <p>Dashboard</p>
+
         <button class="button" onclick="window.location.href='{{ url_for('logout') }}'">Logout</button>
         <button class="button" onclick="window.location.href='{{ url_for('add_device') }}'">Add New Device</button>
     </header>

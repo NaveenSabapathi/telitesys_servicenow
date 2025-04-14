@@ -1,145 +1,83 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Devices with Delivery Pending</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
-    <style>
-        /* Custom CSS styles */
-        body {
-            background-color: #f8f9fa; /* Light gray background */
-            color: #343a40; /* Dark gray text */
-        }
-        .container {
-            margin-top: 50px;
-        }
-        .device-table th, .device-table td {
-            vertical-align: middle;
-        }
-        .device-table tbody tr:nth-child(even) {
-            background-color: #f8f9fa; /* Alternate row background */
-        }
-        .device-table tbody tr:hover {
-            background-color: #e9ecef; /* Hover row background */
-        }
-        .service-details {
-            display: none; /* Hide service details initially */
-            padding: 25px;
-            border: 12px solid #ced4da; /* Light gray border */
-            border-radius: 15px;
-            margin-top: 5px;
-        }
-        .service-details.active {
-            display: inline-block; /* Show service details when expanded */
-        }
-        .service-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        .service-table th, .service-table td {
-            border: 1px solid #dee2e6; /* Light gray border */
-            padding: 8px;
-        }
-        .bill-value {
-            width: 100px; /* Adjust width as needed */
-        }
-        .btn-primary {
-            background-color: #007bff; /* Blue button background */
-            border-color: #007bff; /* Blue button border */
-        }
-        .btn-primary:hover {
-            background-color: #0056b3; /* Darker blue on hover */
-            border-color: #0056b3; /* Darker blue border on hover */
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1 class="text-center mb-4">Devices with Delivery Pending</h1>
-        <table class="table table-bordered device-table">
-            <thead>
-                <tr>
-                    <th>Device Name</th>
-                    <th>Serial Number</th>
-                    <th>Issue Description</th>
-                    <th>Delivery Date</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
+{% extends "base.html" %}
 
-            <tbody>
-            {% for device in delivery_devices %}
-                <tr>
-                    <td>{{ device.device_name }}</td>
-                    <td>{{ device.serial_number }}</td>
-                    <td>{{ device.issue_description }}</td>
-                    <td>{{ device.expected_delivery_date }}</td>
-                    <td>
-                        <button type="button" class="btn btn-primary" onclick="toggleServiceDetails('{{ device.id }}')">Show Service Details</button>
-                    </td>
-                </tr>
-                <tr class="service-details" id="service-details-{{ device.id }}">
-                    <td colspan="5">
-                        <table class="service-table">
-                            <thead>
+{% block title %}Devices with Delivery Pending{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Devices with Delivery Pending</h1>
+    <table class="table table-bordered device-table">
+        <thead>
+            <tr>
+                <th>Device Name</th>
+                <th>Serial Number</th>
+                <th>Issue Description</th>
+                <th>Delivery Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for device in delivery_devices %}
+            <tr>
+                <td>{{ device.device_name }}</td>
+                <td>{{ device.serial_number }}</td>
+                <td>{{ device.issue_description }}</td>
+                <td>{{ device.expected_delivery_date }}</td>
+                <td>
+                    <button type="button" class="btn btn-primary" onclick="toggleServiceDetails('{{ device.id }}')">Show Service Details</button>
+                </td>
+            </tr>
+            <tr class="service-details" id="service-details-{{ device.id }}" style="display: none;">
+                <td colspan="5">
+                    <table class="service-table table">
+                        <thead>
+                            <tr>
+                                <th>Spare Name</th>
+                                <th>Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for service in device_service_info[device.id] %}
                                 <tr>
-                                    <th>Spare Name</th>
-                                    <th>Cost</th>
+                                    <td>{{ service.spare_name }}</td>
+                                    <td>₹{{ service.cost }}</td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {% for service in device_service_info[device.id] %}
-                                    <tr>
-                                        <td>{{ service.spare_name }}</td>
-                                        <td>₹{{ service.cost }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                        <label for="bill-value-{{ device.id }}">Enter Final Bill Value:</label>
-                        <input type="number" id="bill-value-{{ device.id }}" class="form-control bill-value">
-                        <button type="button" class="btn btn-primary mt-2" onclick="closeDevice('{{ device.id }}')">Close Device</button>
-                    </td>
-                </tr>
-            {% endfor %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <label for="bill-value-{{ device.id }}">Enter Final Bill Value:</label>
+                    <input type="number" id="bill-value-{{ device.id }}" class="form-control bill-value">
+                    <button type="button" class="btn btn-primary mt-2" onclick="closeDevice('{{ device.id }}')">Close Device</button>
+                </td>
+            </tr>
+        {% endfor %}
         </tbody>
-        </table>
-    </div>
+    </table>
+</div>
+{% endblock %}
 
-    <!-- Bootstrap JS (Optional) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script>
-        function toggleServiceDetails(deviceId) {
-            $('#service-details-' + deviceId).toggleClass('active');
-        }
+<!--{% block scripts %}-->
+<script>
+    function toggleServiceDetails(deviceId) {
+        $('#service-details-' + deviceId).toggle();
+    }
 
-        function closeDevice(deviceId) {
-            var billValue = $('#bill-value-' + deviceId).val();
-            // Perform AJAX request to update device status and bill value
-            $.ajax({
-                url: '/close_device',
-                type: 'POST',
-                data: { device_id: deviceId, bill_value: billValue },
-                success: function(response) {
-                   console.log('Bill closed successfully');
-                   alert('Bill closed successfully');
-                   window.location.reload();
-                    // Handle success response
-                    //console.log(response);
-                },
-                error: function(xhr, status, error) {
-                    alert('data mismatch_ check error logs');
-                    // Handle error response
-                    console.error(error);
-                }
-            });
-        }
-    </script>
-</body>
-</html>
+    function closeDevice(deviceId) {
+        var billValue = $('#bill-value-' + deviceId).val();
+        $.ajax({
+            url: '/close_device',
+            type: 'POST',
+            data: { device_id: deviceId, bill_value: billValue },
+            success: function(response) {
+               console.log('Bill closed successfully');
+               alert('Bill closed successfully');
+               window.location.reload();
+            },
+            error: function(xhr, status, error) {
+                alert('Data mismatch. Check error logs.');
+                console.error(error);
+            }
+        });
+    }
+</script>
+<!--{% endblock %}-->
+
