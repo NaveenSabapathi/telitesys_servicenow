@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Closed Devices{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Closed Devices</h1>
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+
+            <tr>
+                <th>Device Name</th>
+                <th>Serial Number</th>
+                <th>Customer Name</th>
+                <th>Customer Phone</th>
+                <th>Bill Value</th>
+                <th style="width:100%">Bill Status</th>
+                <th>Amount
+                    Received</th>
+                <th>Delivery Status</th>
+                <th>Action</th>
+                <th>Print</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for device in closed_devices %}
+                <tr id="device-{{ device.id }}">
+                    <td>{{ device.device_name }}</td>
+                    <td>{{ device.serial_number }}</td>
+                    <td>{{ device_customer_info[device.id].name }}</td>
+                    <td>{{ device_customer_info[device.id].whatsapp_number }}</td>
+                    <td>₹{{ device.bill_value }}</td>
+                    <td style="width:100%">
+                        <select class="form-control">
+                            <option value="unpaid">Unpaid</option>
+                            <option value="paid">Paid</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" class="form-control" placeholder="Amount Received (₹)">
+                    </td>
+                    <td>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="deliveryStatus-{{ device.id }}">
+                            <label class="form-check-label" for="deliveryStatus-{{ device.id }}">
+                                Delivered
+                            </label>
+                        </div>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-primary" onclick="closeDevice('{{ device.id }}')">Close</button>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-primary" onclick="printDevice('{{ device.id }}')">Print</button>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+<!--</div>-->
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function closeDevice(deviceId) {
+        var row = $('#device-' + deviceId);
+        var billStatus = row.find('select').val();
+        var amountReceived = row.find('input[type="number"]').val();
+        var deliveryStatus = row.find('#deliveryStatus-' + deviceId).is(':checked');
+        var csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+        if (!amountReceived || !deliveryStatus) {
+            alert('Please enter the amount received and mark the delivery status before closing.');
+            return;
+        }
+
+        $.ajax({
+            url: '/close_device_all',
+            type: 'POST',
+            data: {
+                device_id: deviceId,
+                bill_status: billStatus,
+                amount_received: amountReceived,
+                delivery_status: deliveryStatus
+            },
+            headers: {
+                'X-CSRFToken': csrfToken
+            },
+            success: function(response) {
+                console.log('Device closed successfully');
+                alert('Bill closed successfully');
+                window.location.reload();
+            },
+            error: function(xhr, status, error) {
+                console.error('Error occurred:', error);
+                alert('Something went wrong while closing the device.');
+            }
+        });
+    }
+
+    function printDevice(deviceId) {
+        window.open(`/print_ticket/${deviceId}`, '_blank');
+    }
+</script>
+{% endblock %}
+
+</div>
+
+
+

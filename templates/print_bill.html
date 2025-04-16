@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <title>Final Delivery Bill - {{ device.device_name }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 40px;
+        }
+        .bill-container {
+            max-width: 800px;
+            margin: auto;
+            border: 2px solid #000;
+            padding: 30px;
+        }
+        h2 {
+            text-align: center;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .label {
+            font-weight: bold;
+        }
+        .value {
+            margin-left: 10px;
+        }
+        .line {
+            border-bottom: 1px dashed #999;
+            margin: 10px 0;
+        }
+        .totals {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: right;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            margin-top: 30px;
+        }
+        @media print {
+            body {
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body onload="window.print()">
+    <div class="bill-container">
+        <h1 >
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="navbar-logo" height="35px" width="30px">
+            <span >Breeze Computers</span>
+        </h1>
+        <h2>Asset Delivery Challan</h2>
+
+        <div class="section">
+            <div><span class="label">Customer:</span> <span class="value">{{ customer.name }}</span></div>
+            <div><span class="label">Phone:</span> <span class="value">{{ customer.whatsapp_number }}</span></div>
+            <div><span class="label">Email:</span> <span class="value">{{ customer.email or 'N/A' }}</span></div>
+        </div>
+
+        <div class="line"></div>
+
+        <div class="section">
+            <div><span class="label">Device:</span> <span class="value">{{ device.device_name }}</span></div>
+            <div><span class="label">Serial Number:</span> <span class="value">{{ device.serial_number }}</span></div>
+            <div><span class="label">Issue Reported:</span> <span class="value">{{ device.issue_description }}</span></div>
+            <div><span class="label">Work Done:</span> <span class="value">{{ device.work_done or 'N/A' }}</span></div>
+        </div>
+
+        <div class="line"></div>
+
+        <div class="section">
+            <div><span class="label">Delivered By:</span> <span class="value">"(For Breeze Computers)"</span></div>
+            <div><span class="label">              </span> <span class="value"></span></div>
+            <div><span class="label">             </span> <span class="value"></span></div>
+            <div><span class="label">             </span> <span class="value"></span></div>
+            <div><span class="label">Date:</span> <span class="value"> </span></div>
+        </div>
+
+        <div class="line"></div>
+
+        <div class="section totals">
+            <div>Bill Value: ₹{{ device.bill_value }}</div>
+            <div>Amount Received: ₹{{ device.amount_received or 0 }}</div>
+            <div>Balance: ₹{{ (device.bill_value or 0) - (device.amount_received or 0) }}</div>
+        </div>
+
+        <div class="footer">
+            Thank you for choosing us. For any issues, contact our support.<br>
+            {{ current_user.company_name if current_user.is_authenticated else "Service Center Name" }}
+        </div>
+    </div>
+</body>
+</html>

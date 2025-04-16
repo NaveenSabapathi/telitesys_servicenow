@@ -7,14 +7,24 @@ from flask import jsonify
 import matplotlib
 matplotlib.use('agg')
 from datetime import datetime
+from flask_wtf.csrf import CSRFProtect
+from flask_wtf.csrf import validate_csrf, CSRFError, generate_csrf
+
+
+
 
 app = Flask(__name__)
-
+csrf = CSRFProtect(app)
 # Replace with a strong secret key for production
 app.config['SECRET_KEY'] = 'your_strong_secret_key'
 
 # Adjust database URI as needed. Consider using an environment variable.
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'  # Or other database connection details
+
+
+@app.context_processor
+def inject_csrf_token():
+    return dict(csrf_token=generate_csrf)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:12345@localhost/breezedb'
 
 
@@ -31,23 +41,51 @@ def load_user(user_id):
 @app.route('/')
 def index():
     return redirect(url_for('login'))
+#
+# @app.route('/login', methods=['GET', 'POST'])
+# def login():
+#     if current_user.is_authenticated:
+#         return redirect(url_for('dashboard'))
+#     if request.method == 'POST':
+#         username = request.form['username']
+#         password = request.form['password']
+#         user = User.query.filter_by(username=username).first()
+#         if user and user.verify_password(password):  # Use verify_password from User model
+#             login_user(user)
+#             return redirect(url_for('dashboard'))
+#         else:
+#             flash('Invalid username or password', 'error')
+#     return render_template('login.html')
+
+# Registration route (similar to login route)
+
+# CSRF INJECTED LOGIN 16/04
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
+
     if request.method == 'POST':
+        try:
+            # Validate CSRF token
+            csrf_token = request.form.get('csrf_token')
+            validate_csrf(csrf_token)
+        except CSRFError:
+            flash("CSRF token is missing or invalid.", "error")
+            return redirect(url_for('login'))
+
         username = request.form['username']
         password = request.form['password']
         user = User.query.filter_by(username=username).first()
-        if user and user.verify_password(password):  # Use verify_password from User model
+        if user and user.verify_password(password):
             login_user(user)
             return redirect(url_for('dashboard'))
         else:
             flash('Invalid username or password', 'error')
+
     return render_template('login.html')
 
-# Registration route (similar to login route)
 
 @app.route('/register', methods=['GET', 'POST'])
 #todo need to find some alternate ways for setting up new users
@@ -125,6 +163,17 @@ def dashboard():
 
         return render_template('dashboard.html', assigned_devices_count=assigned_devices_count,available_devices=available_devices,pending_delivery_count=pending_delivery_count,unbilled_devices_count=unbilled_devices_count,unassigned_devices_count=unassigned_devices_count, delivery_ready_devices=delivery_ready_devices, bill_today = pending_bill_amount )
 
+
+@app.route('/print_bill/<int:device_id>')
+@login_required
+def print_bill(device_id):
+    device = Device.query.get_or_404(device_id)
+    customer = Customer.query.get(device.customer_id)
+
+    if not customer:
+        return "Customer not found", 404
+
+    return render_template('print_bill.html', device=device, customer=customer)
 
 
 def bill_today():
@@ -423,7 +472,8 @@ def finish_service():
 @app.route('/close_device', methods=['POST'])
 @login_required
 def close_device():
-    if current_user.user_level == 'admin':
+    print("Close deive triggered")
+    if current_user.user_level != None: # == 'admin':
         print("stated close waiting")
         if request.method == 'POST':
             device_id = request.form['device_id']

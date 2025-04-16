@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 
 {% block title %}Devices with Delivery Pending{% endblock %}
-
 {% block content %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <div class="container mt-5">
     <h1 class="text-center mb-4">Devices with Delivery Pending</h1>
     <table class="table table-bordered device-table">
@@ -53,9 +54,10 @@
         </tbody>
     </table>
 </div>
+
+{% block scripts %}
 {% endblock %}
 
-<!--{% block scripts %}-->
 <script>
     function toggleServiceDetails(deviceId) {
         $('#service-details-' + deviceId).toggle();
@@ -63,21 +65,30 @@
 
     function closeDevice(deviceId) {
         var billValue = $('#bill-value-' + deviceId).val();
+        console.log("Closing device:", deviceId, "with bill value:", billValue);
+
         $.ajax({
             url: '/close_device',
             type: 'POST',
-            data: { device_id: deviceId, bill_value: billValue },
+            data: {
+                device_id: deviceId,
+                bill_value: billValue
+            },
+            headers: {
+                'X-CSRFToken': $('meta[name="csrf-token"]').attr('content')
+            },
             success: function(response) {
-               console.log('Bill closed successfully');
-               alert('Bill closed successfully');
-               window.location.reload();
+                console.log('Success:', response);
+                alert('Device closed and marked for delivery.');
+                window.location.reload();
             },
             error: function(xhr, status, error) {
-                alert('Data mismatch. Check error logs.');
-                console.error(error);
+                console.error('AJAX error:', error);
+                alert('Something went wrong');
             }
         });
     }
 </script>
-<!--{% endblock %}-->
+{% endblock %}
+
 

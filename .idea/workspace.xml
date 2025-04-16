@@ -4,26 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9174245e-d628-4566-b313-513376855475" name="Changes" comment="almost done&#10;&#10;functional testing pending&#10;&#10;todo user layout pages and &#10;&#10;print billing pending">
-      <change afterPath="$PROJECT_DIR$/static/images/logo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/images/logo.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/js/script.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/ack_ticket.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/telitesys_servicenow.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/telitesys_servicenow.iml" afterDir="false" />
+    <list default="true" id="9174245e-d628-4566-b313-513376855475" name="Changes" comment="almost done&#10;&#10;functional testing pending&#10;&#10;todo user layout pages and &#10;&#10;print billing pending&#10;&#10;made some UI change and added print acknowledgement">
+      <change afterPath="$PROJECT_DIR$/app_fincut.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/print_bill.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app_cusdata.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_cusdata.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/instance/test.db" beforeDir="false" afterPath="$PROJECT_DIR$/instance/test.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/add_device.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/add_device.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/assigned_devices.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/assigned_devices.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/images/logo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/static/images/logo.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/closed_devices.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/closed_devices.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboard.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/delivery_ready.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/delivery_ready.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/device_assign.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/device_assign.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/new_dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/new_dashboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/service.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/service.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/login.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,6 +64,7 @@
     &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
     &quot;Python.app.executor&quot;: &quot;Run&quot;,
     &quot;Python.app_cusdata.executor&quot;: &quot;Run&quot;,
+    &quot;Python.app_fincut.executor&quot;: &quot;Run&quot;,
     &quot;Python.models.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
@@ -178,7 +171,23 @@
       <option name="project" value="LOCAL" />
       <updated>1715773459072</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="almost done&#10;&#10;functional testing pending&#10;&#10;todo user layout pages and &#10;&#10;print billing pending&#10;&#10;made some UI change and added print acknowledgement">
+      <option name="closed" value="true" />
+      <created>1744619395319</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1744619395319</updated>
+    </task>
+    <task id="LOCAL-00008" summary="almost done&#10;&#10;functional testing pending&#10;&#10;todo user layout pages and &#10;&#10;print billing pending&#10;&#10;made some UI change and added print acknowledgement">
+      <option name="closed" value="true" />
+      <created>1744619413662</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1744619413662</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -186,6 +195,7 @@
     <MESSAGE value="no much" />
     <MESSAGE value="some what done &#10;&#10;functional testing pending&#10;&#10;todo user layout pages and print billing" />
     <MESSAGE value="almost done&#10;&#10;functional testing pending&#10;&#10;todo user layout pages and &#10;&#10;print billing pending" />
-    <option name="LAST_COMMIT_MESSAGE" value="almost done&#10;&#10;functional testing pending&#10;&#10;todo user layout pages and &#10;&#10;print billing pending" />
+    <MESSAGE value="almost done&#10;&#10;functional testing pending&#10;&#10;todo user layout pages and &#10;&#10;print billing pending&#10;&#10;made some UI change and added print acknowledgement" />
+    <option name="LAST_COMMIT_MESSAGE" value="almost done&#10;&#10;functional testing pending&#10;&#10;todo user layout pages and &#10;&#10;print billing pending&#10;&#10;made some UI change and added print acknowledgement" />
   </component>
 </project>
