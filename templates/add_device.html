@@ -4,14 +4,16 @@
 
 {% block content %}
 <div class="container py-4">
-    <h1 class="mb-4">Add Device</h1>
-    <form action="{{ url_for('add_device') }}" method="POST" class="form">
+    <h2 class="text-center mb-4">Add Device</h2>
+    <form action="{{ url_for('add_device') }}" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
         <div class="form-group">
             <label for="whatsapp_number">WhatsApp Number</label>
             <div class="input-group">
                 <input type="text" id="whatsapp_number" name="whatsapp_number" class="form-control" required>
                 <div class="input-group-append">
-                    <button type="button" onclick="searchCustomer()" class="btn btn-primary">Search</button>
+                    <button type="button" onclick="searchCustomer()" class="btn btn-info">Search</button>
                 </div>
             </div>
         </div>
@@ -54,7 +56,12 @@
 
         <div class="form-group">
             <label for="issue_description">Issue Description</label>
-            <textarea id="issue_description" name="issue_description" rows="4" class="form-control" required></textarea>
+            <textarea id="issue_description" name="issue_description" rows="3" class="form-control" required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="device_image">Upload Device Image</label>
+            <input type="file" name="device_image" id="device_image" class="form-control-file">
         </div>
 
         <div class="form-group">
@@ -68,30 +75,31 @@
 
         <div class="form-group">
             <label for="remark">Remark</label>
-            <textarea id="remark" name="remark" rows="4" class="form-control"></textarea>
+            <textarea id="remark" name="remark" rows="2" class="form-control"></textarea>
         </div>
 
-        <div class="form-group">
-            <label for="received_date">Received Date</label>
-            <input type="date" id="received_date" name="received_date" class="form-control" required>
-        </div>
-
-        <div class="form-group">
-            <label for="expected_delivery_date">Expected Delivery Date</label>
-            <input type="date" id="expected_delivery_date" name="expected_delivery_date" class="form-control" required>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="received_date">Received Date</label>
+                <input type="date" id="received_date" name="received_date" class="form-control" required>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="expected_delivery_date">Expected Delivery Date</label>
+                <input type="date" id="expected_delivery_date" name="expected_delivery_date" class="form-control" required>
+            </div>
         </div>
 
         <div class="form-group">
             <label for="expected_budget">Expected Budget</label>
             <div class="input-group">
                 <div class="input-group-prepend">
-                    <span class="input-group-text">₹</span>
+                    <span class="input-group-text">&#8377;</span>
                 </div>
                 <input type="number" id="expected_budget" name="expected_budget" class="form-control" required>
             </div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block">Add Device</button>
+        <button type="submit" class="btn btn-success btn-block">Add Device</button>
     </form>
 </div>
 {% endblock %}
@@ -99,24 +107,20 @@
 {% block scripts %}
 <script>
     function searchCustomer() {
-        var whatsappNumber = document.getElementById('whatsapp_number').value;
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', '/search_customer/' + whatsappNumber, true);
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4 && xhr.status == 200) {
-                var response = JSON.parse(xhr.responseText);
-                if (response.error) {
+        const whatsappNumber = document.getElementById('whatsapp_number').value;
+        fetch('/search_customer/' + whatsappNumber)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
                     document.getElementById('customer_name').value = '';
                     document.getElementById('location').value = '';
-                    document.getElementById('customer_details').style.display = 'block';
                 } else {
-                    document.getElementById('customer_name').value = response.name;
-                    document.getElementById('location').value = response.location;
-                    document.getElementById('customer_details').style.display = 'block';
+                    document.getElementById('customer_name').value = data.name;
+                    document.getElementById('location').value = data.location;
                 }
-            }
-        };
-        xhr.send();
+                document.getElementById('customer_details').style.display = 'block';
+            })
+            .catch(error => console.error('Error fetching customer:', error));
     }
 </script>
 {% endblock %}

@@ -1,14 +1,14 @@
-
 {% extends "base.html" %}
-
 {% block title %}Assign Device{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
     <h1 class="text-center mb-4">Assign Device</h1>
-    <form action="{{ url_for('assigning_devices') }}" method="POST">
-        <table class="table table-bordered device-table">
-            <thead>
+
+    <!-- Responsive Table for Desktop -->
+    <div class="d-none d-md-block">
+        <table class="table table-bordered">
+            <thead class="thead-dark">
                 <tr>
                     <th>Customer Name</th>
                     <th>Device Name</th>
@@ -21,22 +21,19 @@
             </thead>
             <tbody>
                 {% for device in unassigned_devices %}
-                    <tr>
-                        {% set found_customer = false %}
-                        {% for customer in customer %}
-                            {% if device.customer_id == customer.id %}
-                                <td>{{ customer.name }}</td>
-                                {% set found_customer = true %}
-                            {% endif %}
-                        {% endfor %}
+                {% set found_customer = cus | selectattr("id", "equalto", device.customer_id) | list | first %}
+                <tr>
+                    <form action="{{ url_for('assigning_devices') }}" method="POST" class="mb-0">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <td>{{ found_customer.name if found_customer else 'N/A' }}</td>
                         <td>{{ device.device_name }}</td>
                         <td>{{ device.serial_number }}</td>
                         <td>{{ device.issue_description }}</td>
-                        <td>{{ device.expected_delivery_date }}</td>
+                        <td>{{ device.expected_delivery_date.strftime('%Y-%m-%d') }}</td>
                         <td>
-                            <select name="user_id" class="form-control">
+                            <select name="user_id" class="form-control" required>
                                 {% for user in available_users %}
-                                    <option value="{{ user.id }}">{{ user.username }}</option>
+                                <option value="{{ user.id }}">{{ user.username }}</option>
                                 {% endfor %}
                             </select>
                         </td>
@@ -44,17 +41,42 @@
                             <input type="hidden" name="device_id" value="{{ device.id }}">
                             <button type="submit" class="btn btn-primary">Assign</button>
                         </td>
-                    </tr>
+                    </form>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
-    </form>
-</div>
-{% endblock %}
+    </div>
 
-{% block scripts %}
-<!-- Optional Bootstrap JS -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Card View for Mobile -->
+    <div class="d-block d-md-none">
+        {% for device in unassigned_devices %}
+        {% set found_customer = cus | selectattr("id", "equalto", device.customer_id) | list | first %}
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">{{ device.device_name }}</h5>
+                <p class="card-text">
+                    <strong>Customer:</strong> {{ found_customer.name if found_customer else 'N/A' }}<br>
+                    <strong>Serial:</strong> {{ device.serial_number }}<br>
+                    <strong>Issue:</strong> {{ device.issue_description }}<br>
+                    <strong>Delivery Date:</strong> {{ device.expected_delivery_date.strftime('%Y-%m-%d') }}
+                </p>
+                <form action="{{ url_for('assigning_devices') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="device_id" value="{{ device.id }}">
+                    <div class="form-group">
+                        <label for="user_id_{{ device.id }}">Assign To:</label>
+                        <select name="user_id" id="user_id_{{ device.id }}" class="form-control" required>
+                            {% for user in available_users %}
+                            <option value="{{ user.id }}">{{ user.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-primary btn-block">Assign</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

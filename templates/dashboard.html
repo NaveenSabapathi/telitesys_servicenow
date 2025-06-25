@@ -5,7 +5,22 @@
 {% block content %}
 <div class="container py-4">
     <h1 class="mb-4">Device Overview</h1>
-
+    <div class="col-md-4">
+    <a href="{{ url_for('add_device') }}" class="text-decoration-none text-dark">
+        <div class="card shadow-sm h-100 border-primary">
+            <div class="card-body text-center">
+                <h5 class="card-title text-primary">Add New Device</h5>
+                <p class="display-6"><i class="bi bi-plus-circle"></i></p>
+                <div class="progress">
+                    <div class="progress-bar bg-primary" role="progressbar"
+                         style="width: 100%"
+                         aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </a>
+</div>
     <div class="row g-4">
         <!-- Assigned Devices -->
         <div class="col-md-4">
@@ -84,16 +99,44 @@
                 </div>
             </a>
         </div>
+<!-----------------Service time overlap --------------------->
 
-        <!-- Service Time Overlap -->
         <div class="col-md-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-body text-center">
+            <a href="{{ url_for('device_time_overlap') }}" class="text-decoration-none text-dark">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center">
                     <h5 class="card-title">Service Time Overlap</h5>
                     <p class="display-6">{{ pending_delivery_count }}</p>
+                        <div class="progress">
+                            <div class="progress-bar bg-danger" role="progressbar"
+                                 style="width: {% if total_billing_pool > 0 %}{{ (delivery_ready_devices / total_billing_pool) * 100 }}{% else %}0{% endif %}%"
+                                 aria-valuenow="{{ (delivery_ready_devices / total_billing_pool) * 100 if total_billing_pool > 0 else 0 }}"
+                                 aria-valuemin="0" aria-valuemax="100">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Closed Devices History -->
+<div class="col-md-4">
+    <a href="{{ url_for('closed_device_history') }}" class="text-decoration-none text-dark">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Closed Device History</h5>
+                <p class="display-6">{{ closed_device_history }} <i class="bi bi-archive"></i></p>
+                <div class="progress">
+                    <div class="progress-bar bg-secondary" role="progressbar"
+                         style="width: 100%"
+                         aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                    </div>
                 </div>
             </div>
         </div>
+    </a>
+</div>
+
 
         <!-- Bill Processed Today -->
         <div class="col-md-4">
@@ -107,6 +150,8 @@
     </div>
 </div>
 {% endblock %}
+
+
 
 {% block scripts %}
 <script>

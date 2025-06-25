@@ -1,71 +1,64 @@
 {% extends "base.html" %}
 
 {% block title %}Devices with Delivery Pending{% endblock %}
+
 {% block content %}
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Devices with Delivery Pending</h2>
 
-<div class="container mt-5">
-    <h1 class="text-center mb-4">Devices with Delivery Pending</h1>
-    <table class="table table-bordered device-table">
-        <thead>
-            <tr>
-                <th>Device Name</th>
-                <th>Serial Number</th>
-                <th>Issue Description</th>
-                <th>Delivery Date</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for device in delivery_devices %}
-            <tr>
-                <td>{{ device.device_name }}</td>
-                <td>{{ device.serial_number }}</td>
-                <td>{{ device.issue_description }}</td>
-                <td>{{ device.expected_delivery_date }}</td>
-                <td>
-                    <button type="button" class="btn btn-primary" onclick="toggleServiceDetails('{{ device.id }}')">Show Service Details</button>
-                </td>
-            </tr>
-            <tr class="service-details" id="service-details-{{ device.id }}" style="display: none;">
-                <td colspan="5">
-                    <table class="service-table table">
-                        <thead>
-                            <tr>
-                                <th>Spare Name</th>
-                                <th>Cost</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for service in device_service_info[device.id] %}
-                                <tr>
-                                    <td>{{ service.spare_name }}</td>
-                                    <td>₹{{ service.cost }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    <label for="bill-value-{{ device.id }}">Enter Final Bill Value:</label>
-                    <input type="number" id="bill-value-{{ device.id }}" class="form-control bill-value">
-                    <button type="button" class="btn btn-primary mt-2" onclick="closeDevice('{{ device.id }}')">Close Device</button>
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    {% for device in delivery_devices %}
+    <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">{{ device.device_name }}</h5>
+            <p class="mb-1"><strong>Serial Number:</strong> {{ device.serial_number }}</p>
+            <p class="mb-1"><strong>Issue:</strong> {{ device.issue_description }}</p>
+            <p class="mb-1"><strong>Delivery Date:</strong> {{ device.expected_delivery_date.strftime('%Y-%m-%d') }}</p>
+
+            <button class="btn btn-primary btn-sm w-100 mt-2" onclick="toggleServiceDetails('{{ device.id }}')">
+                Show Service Details
+            </button>
+
+            <div class="mt-3" id="service-details-{{ device.id }}" style="display: none;">
+                <h6>Spare Parts</h6>
+                <ul class="list-group mb-3">
+                    {% for service in device_service_info[device.id] %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>{{ service.spare_name }}</span>
+                        <span>₹{{ service.cost }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+
+                <input type="number" inputmode="decimal" pattern="[0-9]*"
+                       class="form-control mb-2" id="bill-value-{{ device.id }}"
+                       placeholder="Enter Final Bill Value" required min="0" step="0.01">
+
+                <button class="btn btn-success btn-sm w-100" onclick="closeDevice('{{ device.id }}')">
+                    Close Device
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
 </div>
-
-{% block scripts %}
 {% endblock %}
 
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     function toggleServiceDetails(deviceId) {
         $('#service-details-' + deviceId).toggle();
     }
 
     function closeDevice(deviceId) {
-        var billValue = $('#bill-value-' + deviceId).val();
-        console.log("Closing device:", deviceId, "with bill value:", billValue);
+        const billInput = document.getElementById('bill-value-' + deviceId);
+        const billValue = billInput.value.trim();
+
+        if (!billValue || isNaN(billValue)) {
+            alert("Please enter a valid bill amount.");
+            billInput.focus();
+            return;
+        }
 
         $.ajax({
             url: '/close_device',
@@ -78,7 +71,6 @@
                 'X-CSRFToken': $('meta[name="csrf-token"]').attr('content')
             },
             success: function(response) {
-                console.log('Success:', response);
                 alert('Device closed and marked for delivery.');
                 window.location.reload();
             },
@@ -90,5 +82,3 @@
     }
 </script>
 {% endblock %}
-
-

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Deadline Missed Devices{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Pending Service Devices</h1>
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>Device Name</th>
+                <th>Serial Number</th>
+                <th>Issue Description</th>
+                <th>Status</th>
+                <th>New Delivery Date</th>
+                <th>Assign To</th>
+                <th>Description</th>
+                <th>Remarks</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for device in pending_devices %}
+            <tr>
+                <form class="device-update-form" data-device-id="{{ device.id }}">
+                    <td>{{ device.device_name }}</td>
+                    <td>{{ device.serial_number }}</td>
+                    <td>{{ device.issue_description }}</td>
+                    <td>{{ device.device_status }}</td>
+                    <td>
+                        <input type="date" name="new_expected_date" class="form-control" required>
+                    </td>
+                    <td>
+                        <select name="assigned_to" class="form-control" required>
+                            <option value="" disabled selected>Choose</option>
+                            {% for user in available_users %}
+                                <option value="{{ user.username }}">{{ user.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>
+                        <input type="text" name="description" class="form-control" value="{{ device.description }}">
+                    </td>
+                    <td>
+                        <input type="text" name="remarks" class="form-control" placeholder="Optional">
+                    </td>
+                    <td>
+                        <button type="submit" class="btn btn-success btn-sm">Update & Notify</button>
+                    </td>
+                </form>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+            <li class="page-item"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item"><a class="page-link" href="#">Next</a></li>
+        </ul>
+    </nav>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        $('.device-update-form').on('submit', function (e) {
+            e.preventDefault();
+            const form = $(this);
+            const deviceId = form.data('device-id');
+            const formData = form.serialize() + `&device_id=${deviceId}`;
+
+            $.post('/update_device_info', formData, function (response) {
+                if (response.success) {
+                    alert("Device updated and assigned!");
+                    location.reload();
+                } else {
+                    alert(response.message || "Update failed!");
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

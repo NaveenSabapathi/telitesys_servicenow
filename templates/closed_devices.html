@@ -5,125 +5,134 @@
 {% block content %}
 <div class="container mt-5">
     <h1 class="text-center mb-4">Closed Devices</h1>
-    <table class="table table-bordered">
-        <thead class="thead-dark">
 
-            <tr>
-                <th>Device Name</th>
-                <th>Serial Number</th>
-                <th>Customer Name</th>
-                <th>Customer Phone</th>
-                <th>Bill Value</th>
-                <th>Bill Status</th>
-                <th>Amount Received</th>
-                <th>Delivery Status</th>
-                <th>Action</th>
-                <th>Print</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for device in closed_devices %}
+    <!-- Desktop Table View -->
+    <div class="d-none d-md-block">
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Device Name</th>
+                    <th>Serial Number</th>
+                    <th>Customer Name</th>
+                    <th>Customer Phone</th>
+                    <th>Bill Value</th>
+                    <th>Bill Status</th>
+                    <th>Amount Received</th>
+                    <th>Delivery</th>
+                    <th colspan="3" class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for device in closed_devices %}
                 <tr id="device-{{ device.id }}">
                     <td>{{ device.device_name }}</td>
                     <td>{{ device.serial_number }}</td>
                     <td>{{ device_customer_info[device.id].name }}</td>
                     <td>{{ device_customer_info[device.id].whatsapp_number }}</td>
                     <td>₹{{ device.bill_value }}</td>
-                    <td style="width:100%">
-                        <select class="form-control">
+                    <td>
+                        <select class="form-control bill-status">
                             <option value="unpaid">Unpaid</option>
                             <option value="paid">Paid</option>
                         </select>
                     </td>
                     <td>
-                        <input type="number" class="form-control" placeholder="Amount Received (₹)">
+                        <input type="number" class="form-control amount-received" placeholder="₹ Received">
+                    </td>
+                    <td class="text-center">
+                        <input class="form-check-input" type="checkbox" id="deliveryStatus-{{ device.id }}">
+                        <label class="form-check-label" for="deliveryStatus-{{ device.id }}">Delivered</label>
                     </td>
                     <td>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="deliveryStatus-{{ device.id }}">
-                            <label class="form-check-label" for="deliveryStatus-{{ device.id }}">
-                                Delivered
-                            </label>
-                        </div>
+                        <button class="btn btn-success btn-sm" onclick="closeDevice('{{ device.id }}')">✅</button>
                     </td>
                     <td>
-                        <button type="button" class="btn btn-primary" onclick="closeDevice('{{ device.id }}')">Close</button>
+                        <button class="btn btn-primary btn-sm" onclick="printDevice('{{ device.id }}')">🧾</button>
                     </td>
                     <td>
-                        <button type="button" class="btn btn-primary" onclick="printDevice('{{ device.id }}')">Print</button>
-                    </td>
-                    <td>
-                    <button class="btn btn-success btn-sm" onclick="sendToWhatsApp('{{ device.customer_phone }}', {{ device.id }})">
-    📱 Send to WhatsApp
-</button>
+                        <button class="btn btn-success btn-sm" onclick="sendToWhatsApp('{{ device_customer_info[device.id].whatsapp_number }}', '{{ device.id }}')">📱</button>
                     </td>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-<!--</div>-->
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Mobile Card View -->
+    <div class="d-block d-md-none">
+        {% for device in closed_devices %}
+        <div class="card mb-3" id="device-{{ device.id }}">
+            <div class="card-body">
+                <h5 class="card-title">{{ device.device_name }}</h5>
+                <p><strong>Serial:</strong> {{ device.serial_number }}</p>
+                <p><strong>Customer:</strong> {{ device_customer_info[device.id].name }}</p>
+                <p><strong>Phone:</strong> {{ device_customer_info[device.id].whatsapp_number }}</p>
+                <p><strong>Bill:</strong> ₹{{ device.bill_value }}</p>
+                <div class="form-group">
+                    <label>Bill Status:</label>
+                    <select class="form-control bill-status">
+                        <option value="unpaid">Unpaid</option>
+                        <option value="paid">Paid</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Amount Received:</label>
+                    <input type="number" class="form-control amount-received" placeholder="₹ Received">
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="deliveryStatus-{{ device.id }}">
+                    <label class="form-check-label" for="deliveryStatus-{{ device.id }}">Delivered</label>
+                </div>
+                <div class="btn-group d-flex" role="group">
+                    <button class="btn btn-success btn-sm w-100" onclick="closeDevice('{{ device.id }}')">✅</button>
+                    <button class="btn btn-primary btn-sm w-100" onclick="printDevice('{{ device.id }}')">🧾</button>
+                    <button class="btn btn-success btn-sm w-100" onclick="sendToWhatsApp('{{ device_customer_info[device.id].whatsapp_number }}', '{{ device.id }}')">📱</button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    function closeDevice(deviceId) {
-        var row = $('#device-' + deviceId);
-        var billStatus = row.find('select').val();
-        var amountReceived = row.find('input[type="number"]').val();
-        var deliveryStatus = row.find('#deliveryStatus-' + deviceId).is(':checked');
-        var csrfToken = $('meta[name="csrf-token"]').attr('content');
+function closeDevice(deviceId) {
+    const button = event.target;
+    const container = button.closest(`#device-${deviceId}`);
+    const billStatus = container.querySelector(".bill-status").value;
+    const amountReceived = container.querySelector(".amount-received").value;
+    const deliveryStatus = container.querySelector(`#deliveryStatus-${deviceId}`).checked;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
 
-        if (!amountReceived || !deliveryStatus) {
-            alert('Please enter the amount received and mark the delivery status before closing.');
-            return;
-        }
-
-        $.ajax({
-            url: '/close_device_all',
-            type: 'POST',
-            data: {
-                device_id: deviceId,
-                bill_status: billStatus,
-                amount_received: amountReceived,
-                delivery_status: deliveryStatus
-            },
-            headers: {
-                'X-CSRFToken': csrfToken
-            },
-            success: function(response) {
-                console.log('Device closed successfully');
-                alert('Bill closed successfully');
-                window.location.reload();
-            },
-            error: function(xhr, status, error) {
-                console.error('Error occurred:', error);
-                alert('Something went wrong while closing the device.');
-            }
-        });
+    if (!amountReceived || !deliveryStatus) {
+        alert("Please enter amount received and mark delivery as complete.");
+        return;
     }
 
-    function printDevice(deviceId) {
-        window.open(`/print_ticket/${deviceId}`, '_blank');
-    }
-</script>4
-
-    <script>
-    function printDevice(deviceId) {
-        window.open(`/print_bill/${deviceId}`, '_blank');
-    }
-</script>
-
-    <script>
-    function sendToWhatsApp(phone, deviceId) {
-        // Format the WhatsApp link with a message and device link
-        const message = encodeURIComponent(`Hello! Your service is completed. You can view your bill here: https://yourdomain.com/print_bill/${deviceId}`);
-        const whatsappUrl = `https://wa.me/${phone}?text=${message}`;
-
-        // Open WhatsApp chat
-        window.open(whatsappUrl, '_blank');
-    }
+    fetch("/close_device_all", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": csrfToken
+        },
+        body: new URLSearchParams({
+            device_id: deviceId,
+            bill_status: billStatus,
+            amount_received: amountReceived,
+            delivery_status: deliveryStatus
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert("Device closed successfully.");
+        location.reload();
+    })
+    .catch(error => {
+        console.error("Error closing device:", error);
+        alert("Something went wrong.");
+    });
+}
 </script>
 
 {% endblock %}
-
-</div>

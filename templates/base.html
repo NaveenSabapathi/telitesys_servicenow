@@ -94,6 +94,23 @@
         color: black;
     }
 }
+    /* Show table view by default (desktop), hide mobile card view */
+.table-desktop {
+    display: block;
+}
+.card-mobile {
+    display: none;
+}
+
+/* For mobile screens: hide table, show card layout */
+@media (max-width: 768px) {
+    .table-desktop {
+        display: none;
+    }
+    .card-mobile {
+        display: block;
+    }
+}
 </style>
 
 </body>

@@ -1,7 +1,7 @@
 
 from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_login import LoginManager, login_user, current_user, logout_user, login_required
-from models import User, db, Device
+from models_old import User, db, Device
 from functools import partial
 
 app = Flask(__name__)

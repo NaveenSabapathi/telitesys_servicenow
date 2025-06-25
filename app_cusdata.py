@@ -1,15 +1,20 @@
+from dateutil.utils import today
 from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_login import LoginManager, login_user, current_user, logout_user, login_required
 from models import User, db, Device, Customer, SparePart, Service
 from functools import partial
 from flask_migrate import Migrate
 from flask import jsonify
-import matplotlib
+import matplotlib, os
 matplotlib.use('agg')
 from datetime import datetime
 from flask_wtf.csrf import CSRFProtect
 from flask_wtf.csrf import validate_csrf, CSRFError, generate_csrf
-
+from flask import request, render_template
+from models import Device, Customer
+from flask_login import login_required
+from sqlalchemy import or_, and_
+from werkzeug.utils import secure_filename
 
 
 
@@ -17,9 +22,11 @@ app = Flask(__name__)
 csrf = CSRFProtect(app)
 # Replace with a strong secret key for production
 app.config['SECRET_KEY'] = 'your_strong_secret_key'
+app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Adjust database URI as needed. Consider using an environment variable.
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'  # Or other database connection details
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:12345@localhost/breeze'
 
 
 @app.context_processor
@@ -41,22 +48,6 @@ def load_user(user_id):
 @app.route('/')
 def index():
     return redirect(url_for('login'))
-#
-# @app.route('/login', methods=['GET', 'POST'])
-# def login():
-#     if current_user.is_authenticated:
-#         return redirect(url_for('dashboard'))
-#     if request.method == 'POST':
-#         username = request.form['username']
-#         password = request.form['password']
-#         user = User.query.filter_by(username=username).first()
-#         if user and user.verify_password(password):  # Use verify_password from User model
-#             login_user(user)
-#             return redirect(url_for('dashboard'))
-#         else:
-#             flash('Invalid username or password', 'error')
-#     return render_template('login.html')
-
 # Registration route (similar to login route)
 
 # CSRF INJECTED LOGIN 16/04
@@ -88,34 +79,54 @@ def login():
 
 
 @app.route('/register', methods=['GET', 'POST'])
-#todo need to find some alternate ways for setting up new users
-#ss @login_required
 def register():
-    #todo need to setup  so if theres no registered user in db, i will redirect to registration page ,
-    # or else it will pop up ask admin account to create a login with admin names
-    if User.query.first() is not None:
-        print("Need to create a account")
-    else:
-        print("GO HERE")
-        if current_user.user_level != 'admin':
-            print("yes")
-        return redirect(url_for('dashboard'))
+    # Allow registration only if no users exist OR current user is admin
+    if User.query.first() is None:
+        if request.method == 'POST':
+            username = request.form['username']
+            password = request.form['password']
+            phone_number = request.form['phone_number']
+            user_level = 'admin'  # First user becomes admin
+
+            if User.query.filter_by(phone_number=phone_number).first():
+                flash('Phone number already registered', 'error')
+                return redirect(url_for('register'))
+
+            user = User(username=username, phone_number=phone_number, user_level=user_level)
+            user.set_password(password)
+            db.session.add(user)
+            db.session.commit()
+            flash('Admin account created. Please login.', 'success')
+            return redirect(url_for('login'))
+
+        flash('No users found. Please create an admin account.')
+        return render_template('register.html')
+
+    # Block access if not an admin
+    if not current_user.is_authenticated or current_user.user_level != 'admin':
+        flash('Only admins can register new users.', 'error')
+        return redirect(url_for('login'))
+
+    # Register additional users
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         phone_number = request.form['phone_number']
         user_level = request.form['user_level']
-        print(phone_number)
+
         if User.query.filter_by(phone_number=phone_number).first():
             flash('Phone number already registered', 'error')
             return redirect(url_for('register'))
+
         user = User(username=username, phone_number=phone_number, user_level=user_level)
-        user.set_password(password)  # Use set_password from User model
+        user.set_password(password)
         db.session.add(user)
         db.session.commit()
-        flash('Registration successful! Please login.', 'success')
-        return redirect(url_for('login'))
+        flash('User registered successfully.', 'success')
+        return redirect(url_for('dashboard'))
+
     return render_template('register.html')
+
 
 @app.route('/add_spare_part', methods=['POST'])
 @login_required
@@ -147,9 +158,16 @@ def dashboard():
         delivery_ready_devices = Device.query.filter_by(assign_status='Closed').count()
         # print(delivery_ready_devices)
         today = datetime.now().date()
-        pending_delivery_count = Device.query.filter(Device.expected_delivery_date < today).count()
+        pending_delivery_count = Device.query.filter(
+            and_(
+                Device.expected_delivery_date < today,
+                Device.device_status != 'Delivered'
+            )
+        ).count()
         pending_bill_amount = bill_today()
-        return render_template('dashboard.html', assigned_devices_count=assigned_devices_count,available_devices=available_devices,pending_delivery_count=pending_delivery_count,unbilled_devices_count=unbilled_devices_count,unassigned_devices_count=unassigned_devices_count, delivery_ready_devices=delivery_ready_devices, bill_today = pending_bill_amount )
+        closed_device_history = Device.query.filter_by(assign_status='Delivered').count()
+        print("closed : ", closed_device_history)
+        return render_template('dashboard.html', assigned_devices_count=assigned_devices_count,available_devices=available_devices,pending_delivery_count=pending_delivery_count,unbilled_devices_count=unbilled_devices_count,unassigned_devices_count=unassigned_devices_count, delivery_ready_devices=delivery_ready_devices, bill_today = pending_bill_amount, closed_device_history = closed_device_history )
         # plot_data=plot_data)
     else:
         assigned_devices_count = Device.query.filter_by(assigned_to=current_user.id).count()
@@ -270,6 +288,14 @@ def add_device():
         model = request.form['model']
         serial_number = request.form['serial_number']
         issue_description = request.form['issue_description']
+
+        image_file = request.files.get('device_image')
+        filename = None
+        if image_file and image_file.filename:
+            filename = secure_filename(image_file.filename)
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            image_file.save(image_path)
+
         device_status = request.form['device_status']
         remark = request.form['remark']
 
@@ -291,6 +317,7 @@ def add_device():
             model=model,
             serial_number=serial_number,
             issue_description=issue_description,
+            image_filename=filename,
             device_status=device_status,
             remark=remark,
             service_id=service_id,
@@ -327,11 +354,66 @@ def ack_ticket(device_id):
     return render_template('ack_ticket.html', device=device, customer=customer)
 
 
+#############################code for device overlap ###########################
+###from flask import request, jsonify
 
-######################################################################
+
+@app.route('/device_time_overlap', methods=['GET'])
+@login_required
+def device_time_overlap():
+    if current_user.user_level != "admin":
+        print("you are not the admin")
+        return redirect(url_for('dashboard'))
+    today = datetime.now().date()
+    # pending_devices = Device.query.filter(Device.expected_delivery_date < today).all()
+    pending_devices = Device.query.filter(
+        and_(
+            Device.expected_delivery_date < today,
+            Device.device_status != 'Delivered'
+        )
+    ).all()
+    if not pending_devices:
+        return redirect(url_for('dashboard'))
+
+    cus=[]
+    for device in pending_devices:
+        user = device.customer_id
+        customer = Customer.query.get(user)
+        cus.append(customer)
+        assignee = device.assigned_to
+        date_overlap = device.expected_delivery_date
+
+    user = User.query.all()
+    device_customer_info = {device.id: Customer.query.get(device.customer_id) for device in pending_devices}
+
+    return render_template('device_overlap.html', pending_devices=pending_devices, available_users=user, customer=cus,
+                           assigned_to=assignee, delivery_date=date_overlap)
+
+@app.route('/update_device_info', methods=['POST'])
+@login_required
+def update_device_info():
+    device_id = request.form.get('device_id')
+    description = request.form.get('description')
+    new_date = request.form.get('new_expected_date')
+    assigned_to = request.form.get('assigned_to')
+    remarks = request.form.get('remarks', '')
+
+    device = Device.query.get(device_id)
+    if device:
+        device.description = description
+        device.expected_delivery_date = datetime.strptime(new_date, '%Y-%m-%d')
+        device.assigned_to = assigned_to
+        device.assign_status = 'Assigned'
+        db.session.commit()
+
+        # Optional: send message/email/WhatsApp to `assigned_to` user
+        print(f"Notify user {assigned_to}: Device {device.device_name} has been assigned.")
+
+        return jsonify({'success': True})
+    return jsonify({'success': False, 'message': 'Device not found'}), 404
 
 
-
+###################################################################################################
 ####################################SECTION WHERE ADMIN ASSIGN THE UNASSIGNED DEVICES TO SERVICE TEAM#######################################
 @app.route('/device_assign')
 @login_required
@@ -352,7 +434,7 @@ def device_assign():
         return redirect(url_for('dashboard'))
 
     user = User.query.all()
-    return render_template('device_assign.html',  unassigned_devices = unassigned_devices, available_users = user, customer = cus)
+    return render_template('device_assign.html',  unassigned_devices = unassigned_devices, available_users = user, cus = cus)
 
 # @app.route('/delivery_ready')
 # def delivery_ready():
@@ -420,17 +502,41 @@ def assigning_devices():
     return redirect(url_for('assigned_devices'))
 
 
+# @app.route('/service/<int:device_id>')
+# def service(device_id):
+#     # Logic to fetch device details and spare parts for the given device_id
+#     device = Device.query.get_or_404(device_id)
+#     print(device)
+#     dev_id = device_id
+#     user_is = Device.assigned_to
+#     print(device_id)
+#     print("check this",user_is)
+#     spare_parts = Service.query.filter_by(device_id=device_id).all()
+#     return render_template('service.html', device=device,dev_id=dev_id, spare_parts=spare_parts, user_is = user_is)
+
 @app.route('/service/<int:device_id>')
 def service(device_id):
-    # Logic to fetch device details and spare parts for the given device_id
     device = Device.query.get_or_404(device_id)
-    print(device)
-    dev_id = device_id
-    user_is = Device.assigned_to
-    print(device_id)
-    print("check this",user_is)
-    spare_parts = Service.query.filter_by(device_id=device_id).all()
-    return render_template('service.html', device=device,dev_id=dev_id, spare_parts=spare_parts, user_is = user_is)
+
+    # Ensure service exists for this device
+    service = Service.query.filter_by(device_id=device_id).first()
+    if not service:
+        service = Service(device_id=device.id)
+        db.session.add(service)
+        db.session.commit()
+
+    # Now fetch spare parts linked to this service
+    spare_parts = SparePart.query.filter_by(service_id=service.id).all()
+
+    return render_template(
+        'service.html',
+        device=device,
+        dev_id=service.id,  # This is the correct service_id
+        spare_parts=spare_parts,
+        user_is=device.assigned_to  # Corrected from Device.assigned_to (class-level) to instance
+    )
+
+
 @app.route('/assigned_devices')
 @login_required
 def assigned_devices():
@@ -454,12 +560,15 @@ def finish_service():
         device_id = request.form['device_id']
         print("device_id is:",device_id)
         user_id = request.form['user_id']
-        print("user is:", device_id)
+        print("user is:", user_id)
         # Retrieve the device from the database
         device = Device.query.get(device_id)
         if device:
+            user_id = request.form['user_id']
+            print("True")
+            print(user_id)
             # Update the assigned_to column with the selected user_id
-            device.assigned_to = user_id
+            # device.assigned_to = user_id
             device.assign_status = "Delivery Pending"
             db.session.commit()
             flash('Device assigned successfully!', 'success')
@@ -472,7 +581,7 @@ def finish_service():
 @app.route('/close_device', methods=['POST'])
 @login_required
 def close_device():
-    print("Close deive triggered")
+    print("Close device triggered")
     if current_user.user_level != None: # == 'admin':
         print("stated close waiting")
         if request.method == 'POST':
@@ -487,6 +596,7 @@ def close_device():
                 device.bill_value = bill_value
                 device.assign_status = "Closed"
                 device.device_status = "Ready"
+                device.expected_delivery_date = datetime.today().date()
                 db.session.commit()
                 flash('Device State Updated successfully!', 'success')
             else:
@@ -586,6 +696,32 @@ def close_device_all():
     db.session.commit()
 
     return jsonify({'message': 'Device closed successfully'}), 200
+
+@app.route('/closed_device_history', methods=['GET'])
+@login_required
+def closed_device_history():
+    search_query = request.args.get('search', '')
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+
+    query = Device.query.join(Customer).filter(Device.assign_status == "Delivered")
+
+    if search_query:
+        query = query.filter(
+            or_(
+                Device.device_name.ilike(f"%{search_query}%"),
+                Customer.whatsapp_number.ilike(f"%{search_query}%")
+            )
+        )
+
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    closed_devices = pagination.items
+
+    return render_template('closed_device_history.html',
+                           closed_devices=closed_devices,
+                           pagination=pagination,
+                           search_query=search_query)
+
 
 
 @app.route('/logout')

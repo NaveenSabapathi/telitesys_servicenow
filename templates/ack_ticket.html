@@ -1,17 +1,25 @@
+
+
+
 {% extends "base.html" %}
 
 {% block title %}Acknowledgement Ticket{% endblock %}
 
 {% block content %}
-<div class="container my-5 p-4 border rounded bg-white">
+<div class="container my-5 p-4 border rounded bg-white" id="bill-content">
+    <h1>
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="navbar-logo" height="35px" width="30px">
+        <span>Breeze Computers</span>
+    </h1>
     <h2 class="text-center mb-4">Acknowledgement Ticket</h2>
+
     <div class="row mb-3">
         <div class="col-md-6">
             <strong>Customer Name:</strong> {{ customer.name }}<br>
             <strong>Location:</strong> {{ customer.location }}<br>
             <strong>WhatsApp Number:</strong> {{ customer.whatsapp_number }}
         </div>
-        <div class="col-md-6 text-right">
+        <div class="col-md-6 text-end">
             <strong>Service ID:</strong> {{ device.service_id }}<br>
             <strong>Received Date:</strong> {{ device.received_date.strftime('%d-%m-%Y') }}<br>
             <strong>Expected Delivery:</strong> {{ device.expected_delivery_date.strftime('%d-%m-%Y') }}
@@ -22,43 +30,35 @@
 
     <h5>Device Details</h5>
     <table class="table table-bordered">
-        <tr>
-            <th>Device Type</th>
-            <td>{{ device.device_type }}</td>
-        </tr>
-        <tr>
-            <th>Device Name</th>
-            <td>{{ device.device_name }}</td>
-        </tr>
-        <tr>
-            <th>Model</th>
-            <td>{{ device.model }}</td>
-        </tr>
-        <tr>
-            <th>Serial Number</th>
-            <td>{{ device.serial_number }}</td>
-        </tr>
-        <tr>
-            <th>Issue Description</th>
-            <td>{{ device.issue_description }}</td>
-        </tr>
-        <tr>
-            <th>Device Condition</th>
-            <td>{{ device.device_status }}</td>
-        </tr>
-        <tr>
-            <th>Remark</th>
-            <td>{{ device.remark }}</td>
-        </tr>
-        <tr>
-            <th>Expected Budget</th>
-            <td>₹{{ device.expected_budget }}</td>
-        </tr>
+        <tr><th>Device Type</th><td>{{ device.device_type }}</td></tr>
+        <tr><th>Device Name</th><td>{{ device.device_name }}</td></tr>
+        <tr><th>Model</th><td>{{ device.model }}</td></tr>
+        <tr><th>Serial Number</th><td>{{ device.serial_number }}</td></tr>
+        <tr><th>Issue Description</th><td>{{ device.issue_description }}</td></tr>
+        <tr><th>Device Condition</th><td>{{ device.device_status }}</td></tr>
+        <tr><th>Remark</th><td>{{ device.remark }}</td></tr>
+        <tr><th>Expected Budget</th><td>₹{{ device.expected_budget }}</td></tr>
     </table>
-
-    <div class="text-center mt-4">
-        <button onclick="window.print()" class="btn btn-success">Print Ticket</button>
-        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary ml-2">Back to Dashboard</a>
-    </div>
 </div>
+
+<div class="text-center mt-4">
+    <button onclick="window.print()" class="btn btn-success">Print Ticket</button>
+    <button class="btn btn-primary" id="screenshotBtn">📷 Take Screenshot</button>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+
+<!-- Include html2canvas -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<script>
+    document.getElementById("screenshotBtn").addEventListener("click", function () {
+        const target = document.getElementById("bill-content");
+        html2canvas(target).then(function (canvas) {
+            const link = document.createElement("a");
+            link.download = "acknowledgment_" + new Date().toISOString().replace(/[:.]/g, '-') + ".png";
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        });
+    });
+</script>
 {% endblock %}

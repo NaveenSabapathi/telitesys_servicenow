@@ -19,7 +19,7 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
 # Import models (define them in a separate file ideally)
-from models import User, Device, Customer, Service
+from models_old import User, Device, Customer, Service
 
 # Load user
 def load_user(user_id):

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Closed Device History{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center">Closed Device History</h2>
+
+    <form method="get" class="form-inline my-3 justify-content-center">
+        <input type="text" name="search" class="form-control mr-2 mb-2" placeholder="Search by phone/device" value="{{ search_query }}">
+        <button class="btn btn-primary mb-2">Search</button>
+    </form>
+
+    <!-- Desktop Table -->
+    <div class="table-responsive d-none d-md-block">
+        <table class="table table-hover table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Device</th>
+                    <th>Serial No</th>
+                    <th>Customer</th>
+                    <th>Phone</th>
+                    <th>Issue</th>
+                    <th>Received</th>
+                    <th>Delivered</th>
+                    <th>Assigned</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in closed_devices %}
+                <tr>
+                    <td>{{ d.device_name }}</td>
+                    <td>{{ d.serial_number }}</td>
+                    <td>{{ d.customer.name }}</td>
+                    <td>{{ d.customer.whatsapp_number }}</td>
+                    <td>{{ d.issue_description }}</td>
+                    <td>{{ d.received_date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ d.received_date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ d.assigned_to_user.username if d.assigned_to_user else 'N/A' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Mobile Card View -->
+    <div class="d-block d-md-none">
+        {% for d in closed_devices %}
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">{{ d.device_name }}</h5>
+                <p><strong>Serial:</strong> {{ d.serial_number }}</p>
+                <p><strong>Customer:</strong> {{ d.customer.name }}</p>
+                <p><strong>Phone:</strong> {{ d.customer.whatsapp_number }}</p>
+                <p><strong>Issue:</strong> {{ d.issue_description }}</p>
+                <p><strong>Received:</strong> {{ d.received_date.strftime('%Y-%m-%d') }}</p>
+                <p><strong>Delivered:</strong> {{ d.received_date.strftime('%Y-%m-%d') }}</p>
+                <p><strong>Assigned To:</strong> {{ d.assigned_to_user.username if d.assigned_to_user else 'N/A' }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    <nav>
+        <ul class="pagination justify-content-center">
+            {% if pagination.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('closed_device_history', page=pagination.prev_num, search=search_query) }}">Previous</a>
+                </li>
+            {% endif %}
+            {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                {% if page_num %}
+                    <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('closed_device_history', page=page_num, search=search_query) }}">{{ page_num }}</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+            {% endfor %}
+            {% if pagination.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('closed_device_history', page=pagination.next_num, search=search_query) }}">Next</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endblock %}
