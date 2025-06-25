@@ -4,3 +4,7 @@ Need to work on Login and Registration with oauth and sec compliance
 CRM to integrate for lead and customer followup workflows
 
 workflows has to be updated...
+
+Code clean up pending
+
+main filr --> app_custdata.py
