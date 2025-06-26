@@ -8,32 +8,27 @@ from flask import jsonify
 import matplotlib, os
 matplotlib.use('agg')
 from datetime import datetime
-from flask_wtf.csrf import CSRFProtect
-from flask_wtf.csrf import validate_csrf, CSRFError, generate_csrf
-from flask import request, render_template
-from models import Device, Customer
-from flask_login import login_required
+from flask_wtf.csrf import CSRFProtect,validate_csrf, CSRFError, generate_csrf
 from sqlalchemy import or_, and_
 from werkzeug.utils import secure_filename
 from crm.routes import crm_bp
 from models import db
+from config import Config
 
 
 
 
 
 app = Flask(__name__)
+
+app.config.from_object(Config)
+
 csrf = CSRFProtect(app)
-# Replace with a strong secret key for production
-app.config['SECRET_KEY'] = 'your_strong_secret_key'
+
+
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
 app.register_blueprint(crm_bp, url_prefix="/crm")
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-
-
-
-# Adjust database URI as needed. Consider using an environment variable.
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:12345@localhost/breeze'
 
 db.init_app(app)
 
@@ -443,27 +438,6 @@ def device_assign():
     user = User.query.all()
     return render_template('device_assign.html',  unassigned_devices = unassigned_devices, available_users = user, cus = cus)
 
-# @app.route('/delivery_ready')
-# def delivery_ready():
-#     # Query devices with delivery pending status
-#     delivery_devices = Device.query.filter_by(assign_status='Delivery Pending').all()
-#     if delivery_devices == [] :
-#         return redirect(url_for('dashboard'))
-#     device_service_info = []
-#     print(delivery_devices)
-#     for device in delivery_devices:
-#         s_id = device.id
-#         print("service id is: ",s_id)
-#         service_id = SparePart.query.filter_by(service_id = s_id).all()
-#         print("query result",service_id)
-#         device_service_info.append(service_id)
-#         # for service in device_service_info:
-#         #     print("level 2",service.service_id)
-#
-#     # return render_template('delivery_ready.html', devices_with_service_info=devices_service_info)
-#
-#     return render_template('delivery_ready.html', delivery_devices=delivery_devices, device_service_info=service_id)
-
 
 @app.route('/delivery_ready')
 @login_required
@@ -508,18 +482,6 @@ def assigning_devices():
 
     return redirect(url_for('assigned_devices'))
 
-
-# @app.route('/service/<int:device_id>')
-# def service(device_id):
-#     # Logic to fetch device details and spare parts for the given device_id
-#     device = Device.query.get_or_404(device_id)
-#     print(device)
-#     dev_id = device_id
-#     user_is = Device.assigned_to
-#     print(device_id)
-#     print("check this",user_is)
-#     spare_parts = Service.query.filter_by(device_id=device_id).all()
-#     return render_template('service.html', device=device,dev_id=dev_id, spare_parts=spare_parts, user_is = user_is)
 
 @app.route('/service/<int:device_id>')
 def service(device_id):
@@ -631,42 +593,6 @@ def closed_devices():
         return render_template('closed_devices.html', closed_devices=closed_devices,
                                device_customer_info=device_customer_info)
     return redirect(url_for('dashboard'))
-
-#todo using one field for both delivery update and expected delivery date need to change
-# @app.route('/close_device_all', methods=['POST'])
-# def close_device_all():
-#     device_id = request.form.get('device_id')
-#     bill_status = request.form.get('bill_status')
-#     amount_received = request.form.get('amount_received')
-#     delivery_status = request.form.get('delivery_status')
-#     if delivery_status == 'true':
-#         delivery_status = 'Delivered'
-#     else:
-#         delivery_status = 'Undelivered'
-#     print("this is",delivery_status)
-#     # Check if amount received is null and delivery status is unticked
-#     if not amount_received and not delivery_status:
-#         return jsonify({'error': 'Amount received is required and delivery status must be checked'}), 400
-#
-#     # Assuming you have a Device model with appropriate fields
-#     device = Device.query.get(device_id)
-#     if not device:
-#         return jsonify({'error': 'Device not found'}), 404
-#
-#     # Update the device status and bill status
-#     device.bill_status = bill_status
-#     print(bill_status)
-#     device.amount_received = amount_received
-#     device.device_status = delivery_status
-#     device.assign_status = delivery_status
-#     # Update the expected delivery date to today's date if delivery status is checked
-#     if delivery_status:
-#         device.expected_delivery_date = datetime.now().date()
-#
-#     # Save changes to the database
-#     db.session.commit()
-#
-#     return jsonify({'message': 'Device closed successfully'}), 200
 
 @app.route('/close_device_all', methods=['POST'])
 @login_required

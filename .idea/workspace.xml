@@ -5,21 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9174245e-d628-4566-b313-513376855475" name="Changes" comment="almost done&#10;mobile view updated&#10;postgres done&#10;image upload done&#10;&#10;&#10;functional testing pending&#10;&#10;print billing ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying&#10;&#10;CRM integ pending">
-      <change afterPath="$PROJECT_DIR$/crm/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/crm/models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/crm/routes.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/crm/add_lead.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/crm/followup.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/crm/leads.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.env" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app_cusdata.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_cusdata.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app_fincut.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/instance/new.db" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/instance/new1.db" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/instance/test.db" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models_old.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboard.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,8 +18,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Python Script" />
         <option value="HTML File" />
+        <option value="Python Script" />
       </list>
     </option>
   </component>
@@ -279,7 +268,23 @@
       <option name="project" value="LOCAL" />
       <updated>1750867716437</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="almost done&#10;mobile view updated&#10;postgres done&#10;image upload done&#10;&#10;&#10;functional testing pending&#10;&#10;print billing ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying&#10;&#10;CRM integ pending">
+      <option name="closed" value="true" />
+      <created>1750932647112</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1750932647113</updated>
+    </task>
+    <task id="LOCAL-00012" summary="almost done&#10;mobile view updated&#10;postgres done&#10;image upload done&#10;&#10;&#10;functional testing pending&#10;&#10;print billing ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying&#10;&#10;CRM integ pending">
+      <option name="closed" value="true" />
+      <created>1750932702127</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1750932702127</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
