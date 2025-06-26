@@ -4,11 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9174245e-d628-4566-b313-513376855475" name="Changes" comment="almost done&#10;mobile view updated&#10;postgres done&#10;image upload done&#10;&#10;&#10;functional testing pending&#10;&#10;print billing ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying&#10;&#10;CRM integ pending">
-      <change afterPath="$PROJECT_DIR$/.env" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
+    <list default="true" id="9174245e-d628-4566-b313-513376855475" name="Changes" comment="almost done&#10;mobile view updated&#10;postgres done&#10;image upload done&#10;&#10;&#10;functional testing pending&#10;&#10;print billing ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying&#10;&#10;CRM integ pending&#10;&#10;Config edit done, need to do Notification setup for user and assignee">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app_cusdata.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_cusdata.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,6 +22,12 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="PUSH_TAGS">
+      <GitPushTagMode>
+        <option name="argument" value="--tags" />
+        <option name="title" value="All" />
+      </GitPushTagMode>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -284,7 +288,15 @@
       <option name="project" value="LOCAL" />
       <updated>1750932702127</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="almost done&#10;mobile view updated&#10;postgres done&#10;image upload done&#10;&#10;&#10;functional testing pending&#10;&#10;print billing ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying&#10;&#10;CRM integ pending&#10;&#10;Config edit done, need to do Notification setup for user and assignee">
+      <option name="closed" value="true" />
+      <created>1750934287249</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1750934287249</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -295,6 +307,7 @@
     <MESSAGE value="almost done&#10;&#10;functional testing pending&#10;&#10;todo user layout pages and &#10;&#10;print billing pending&#10;&#10;made some UI change and added print acknowledgement" />
     <MESSAGE value="almost done&#10;&#10;functional testing pending&#10;&#10;todo user layout pages almost done&#10;and &#10;&#10;print billing somewhat ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying" />
     <MESSAGE value="almost done&#10;mobile view updated&#10;postgres done&#10;image upload done&#10;&#10;&#10;functional testing pending&#10;&#10;print billing ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying&#10;&#10;CRM integ pending" />
-    <option name="LAST_COMMIT_MESSAGE" value="almost done&#10;mobile view updated&#10;postgres done&#10;image upload done&#10;&#10;&#10;functional testing pending&#10;&#10;print billing ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying&#10;&#10;CRM integ pending" />
+    <MESSAGE value="almost done&#10;mobile view updated&#10;postgres done&#10;image upload done&#10;&#10;&#10;functional testing pending&#10;&#10;print billing ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying&#10;&#10;CRM integ pending&#10;&#10;Config edit done, need to do Notification setup for user and assignee" />
+    <option name="LAST_COMMIT_MESSAGE" value="almost done&#10;mobile view updated&#10;postgres done&#10;image upload done&#10;&#10;&#10;functional testing pending&#10;&#10;print billing ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying&#10;&#10;CRM integ pending&#10;&#10;Config edit done, need to do Notification setup for user and assignee" />
   </component>
 </project>
