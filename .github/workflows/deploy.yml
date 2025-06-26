@@ -1,4 +1,4 @@
-name: Deploy Flask to EC2 (Amazon Linux)
+name: EC2 (Amazon Linux)
 
 on:
   push:
