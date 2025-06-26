@@ -1,4 +1,4 @@
-name: EC2 (Amazon Linux)
+name: Deploy Flask App to EC2 (Amazon Linux)
 
 on:
   push:
@@ -16,11 +16,12 @@ jobs:
       uses: appleboy/scp-action@v0.1.4
       with:
         host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}   # likely ec2-user for Amazon Linux
-        key: ${{ secrets.EC2_SSH_KEY }}     # Private key stored as GitHub Secret
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
         port: 22
         source: "."
         target: "/home/ec2-user/telitesystems_servicenow/"
+        strip_components: 0
 
     - name: SSH into EC2 and run deploy script
       uses: appleboy/ssh-action@v1.0.0

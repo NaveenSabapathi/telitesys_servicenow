@@ -5,6 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9174245e-d628-4566-b313-513376855475" name="Changes" comment="almost done&#10;mobile view updated&#10;postgres done&#10;image upload done&#10;&#10;&#10;functional testing pending&#10;&#10;print billing ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying&#10;&#10;CRM integ pending&#10;&#10;Config edit done, need to do Notification setup for user and assignee&#10;&#10;workflow updated">
+      <change afterPath="$PROJECT_DIR$/.scpignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -319,7 +321,15 @@
       <option name="project" value="LOCAL" />
       <updated>1750946677745</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="almost done&#10;mobile view updated&#10;postgres done&#10;image upload done&#10;&#10;&#10;functional testing pending&#10;&#10;print billing ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying&#10;&#10;CRM integ pending&#10;&#10;Config edit done, need to do Notification setup for user and assignee&#10;&#10;workflow updated">
+      <option name="closed" value="true" />
+      <created>1750949050719</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1750949050720</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
