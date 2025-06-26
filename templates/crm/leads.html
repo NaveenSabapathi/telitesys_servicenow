@@ -1,0 +1,33 @@
+{# templates/crm/leads.html #}
+{% extends "base.html" %}
+{% block title %}Leads{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Leads</h2>
+    <a href="{{ url_for('crm.add_lead') }}" class="btn btn-success mb-3">+ Add Lead</a>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Source</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lead in leads %}
+            <tr>
+                <td>{{ lead.name }}</td>
+                <td>{{ lead.phone }}</td>
+                <td>{{ lead.source }}</td>
+                <td>{{ lead.status }}</td>
+                <td>
+                    <a href="{{ url_for('crm.follow_up', lead_id=lead.id) }}" class="btn btn-primary btn-sm">Follow Ups</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

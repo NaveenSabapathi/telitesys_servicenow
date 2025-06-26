@@ -1,0 +1,34 @@
+{# templates/crm/add_lead.html #}
+{% extends "base.html" %}
+{% block title %}Add Lead{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Add New Lead</h2>
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" class="form-control" name="name" required>
+        </div>
+        <div class="form-group">
+            <label for="phone">Phone</label>
+            <input type="text" class="form-control" name="phone" required>
+        </div>
+        <div class="form-group">
+            <label for="source">Source</label>
+            <input type="text" class="form-control" name="source">
+        </div>
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select name="status" class="form-control">
+                <option value="new">New</option>
+                <option value="contacted">Contacted</option>
+                <option value="converted">Converted</option>
+                <option value="lost">Lost</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Lead</button>
+    </form>
+</div>
+{% endblock %}
+

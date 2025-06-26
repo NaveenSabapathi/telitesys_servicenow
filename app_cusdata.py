@@ -15,6 +15,10 @@ from models import Device, Customer
 from flask_login import login_required
 from sqlalchemy import or_, and_
 from werkzeug.utils import secure_filename
+from crm.routes import crm_bp
+from models import db
+
+
 
 
 
@@ -23,11 +27,15 @@ csrf = CSRFProtect(app)
 # Replace with a strong secret key for production
 app.config['SECRET_KEY'] = 'your_strong_secret_key'
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
+app.register_blueprint(crm_bp, url_prefix="/crm")
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+
 
 # Adjust database URI as needed. Consider using an environment variable.
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:12345@localhost/breeze'
 
+db.init_app(app)
 
 @app.context_processor
 def inject_csrf_token():
@@ -35,7 +43,6 @@ def inject_csrf_token():
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:12345@localhost/breezedb'
 
 
-db.init_app(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)

@@ -4,30 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9174245e-d628-4566-b313-513376855475" name="Changes" comment="almost done&#10;&#10;functional testing pending&#10;&#10;todo user layout pages almost done&#10;and &#10;&#10;print billing somewhat ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/manage.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models_old.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/closed_device_history.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/device_overlap.html" afterDir="false" />
+    <list default="true" id="9174245e-d628-4566-b313-513376855475" name="Changes" comment="almost done&#10;mobile view updated&#10;postgres done&#10;image upload done&#10;&#10;&#10;functional testing pending&#10;&#10;print billing ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying&#10;&#10;CRM integ pending">
+      <change afterPath="$PROJECT_DIR$/crm/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/crm/models.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/crm/routes.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/crm/add_lead.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/crm/followup.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/crm/leads.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app_cusdata.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_cusdata.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app_fincut.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_fincut.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/instance/sqlite3.exe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/instance/test.db" beforeDir="false" afterPath="$PROJECT_DIR$/instance/test.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/ack_ticket.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/ack_ticket.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/add_device.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/add_device.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/assigned_devices.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/assigned_devices.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/closed_devices.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/closed_devices.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app_fincut.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/instance/new.db" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/instance/new1.db" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/instance/test.db" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models_old.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/delivery_ready.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/delivery_ready.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/device_assign.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/device_assign.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/register.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/service.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/service.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -94,6 +86,28 @@
     </key>
   </component>
   <component name="RunManager" selected="Python.app_cusdata">
+    <configuration name="app" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="telitesys_servicenow" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/app.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="app_cusdata" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="telitesys_servicenow" />
       <option name="ENV_FILES" value="" />
@@ -163,6 +177,7 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.app_cusdata" />
+        <item itemvalue="Python.app" />
         <item itemvalue="Python.models" />
         <item itemvalue="Python.models_old" />
       </list>
@@ -256,7 +271,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744812641098</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="almost done&#10;mobile view updated&#10;postgres done&#10;image upload done&#10;&#10;&#10;functional testing pending&#10;&#10;print billing ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying&#10;&#10;CRM integ pending">
+      <option name="closed" value="true" />
+      <created>1750867716437</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1750867716437</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -266,6 +289,7 @@
     <MESSAGE value="almost done&#10;&#10;functional testing pending&#10;&#10;todo user layout pages and &#10;&#10;print billing pending" />
     <MESSAGE value="almost done&#10;&#10;functional testing pending&#10;&#10;todo user layout pages and &#10;&#10;print billing pending&#10;&#10;made some UI change and added print acknowledgement" />
     <MESSAGE value="almost done&#10;&#10;functional testing pending&#10;&#10;todo user layout pages almost done&#10;and &#10;&#10;print billing somewhat ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying" />
-    <option name="LAST_COMMIT_MESSAGE" value="almost done&#10;&#10;functional testing pending&#10;&#10;todo user layout pages almost done&#10;and &#10;&#10;print billing somewhat ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying" />
+    <MESSAGE value="almost done&#10;mobile view updated&#10;postgres done&#10;image upload done&#10;&#10;&#10;functional testing pending&#10;&#10;print billing ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying&#10;&#10;CRM integ pending" />
+    <option name="LAST_COMMIT_MESSAGE" value="almost done&#10;mobile view updated&#10;postgres done&#10;image upload done&#10;&#10;&#10;functional testing pending&#10;&#10;print billing ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying&#10;&#10;CRM integ pending" />
   </component>
 </project>
