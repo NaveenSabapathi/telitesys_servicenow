@@ -1,0 +1,35 @@
+name: Deploy Flask to EC2 (Amazon Linux)
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Upload code to EC2 via SCP
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}   # likely ec2-user for Amazon Linux
+        key: ${{ secrets.EC2_SSH_KEY }}     # Private key stored as GitHub Secret
+        port: 22
+        source: "."
+        target: "/home/ec2-user/telitesystems_servicenow/"
+
+    - name: SSH into EC2 and run deploy script
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        port: 22
+        script: |
+          cd /home/ec2-user/telitesystems_servicenow/
+          chmod +x deploy.sh
+          ./deploy.sh
