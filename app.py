@@ -666,4 +666,4 @@ def logout():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()  # Create database tables if they don't exist (optional)
-        app.run(host='0.0.0.0',debug=False)  # Run the development server
+        app.run(host='0.0.0.0',port=8000,debug=False)  # Run the development server
