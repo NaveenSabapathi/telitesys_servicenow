@@ -31,6 +31,8 @@ app.register_blueprint(crm_bp, url_prefix="/crm")
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 db.init_app(app)
+#migrations for initial db creation
+migrate = Migrate(app,db)
 
 @app.context_processor
 def inject_csrf_token():
@@ -79,42 +81,29 @@ def login():
 
     return render_template('login.html')
 
-
+#csrf regs temp fix 20/08/25
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    # Allow registration only if no users exist OR current user is admin
-    if User.query.first() is None:
-        if request.method == 'POST':
-            username = request.form['username']
-            password = request.form['password']
-            phone_number = request.form['phone_number']
-            user_level = 'admin'  # First user becomes admin
+    is_first_user = User.query.first() is None
 
-            if User.query.filter_by(phone_number=phone_number).first():
-                flash('Phone number already registered', 'error')
-                return redirect(url_for('register'))
-
-            user = User(username=username, phone_number=phone_number, user_level=user_level)
-            user.set_password(password)
-            db.session.add(user)
-            db.session.commit()
-            flash('Admin account created. Please login.', 'success')
-            return redirect(url_for('login'))
-
-        flash('No users found. Please create an admin account.')
-        return render_template('register.html')
-
-    # Block access if not an admin
-    if not current_user.is_authenticated or current_user.user_level != 'admin':
-        flash('Only admins can register new users.', 'error')
-        return redirect(url_for('login'))
-
-    # Register additional users
     if request.method == 'POST':
+        try:
+            csrf_token = request.form.get('csrf_token')
+            validate_csrf(csrf_token)
+        except CSRFError:
+            flash("CSRF token is missing or invalid.", "error")
+            return redirect(url_for('register'))
+
         username = request.form['username']
         password = request.form['password']
         phone_number = request.form['phone_number']
-        user_level = request.form['user_level']
+        user_level = 'admin' if is_first_user else request.form.get('user_level')
+
+        if not is_first_user:
+            # Allow only admins to register new users
+            if not current_user.is_authenticated or current_user.user_level != 'admin':
+                flash('Only admins can register new users.', 'error')
+                return redirect(url_for('login'))
 
         if User.query.filter_by(phone_number=phone_number).first():
             flash('Phone number already registered', 'error')
@@ -124,12 +113,22 @@ def register():
         user.set_password(password)
         db.session.add(user)
         db.session.commit()
-        flash('User registered successfully.', 'success')
-        return redirect(url_for('dashboard'))
 
-    return render_template('register.html')
+        if is_first_user:
+            flash('Admin account created. Please login.', 'success')
+            return redirect(url_for('login'))
+        else:
+            flash('User registered successfully.', 'success')
+            return redirect(url_for('dashboard'))
+
+    if is_first_user:
+        flash('No users found. Please create an admin account.')
+
+    return render_template('register.html', is_first_user=is_first_user)
 
 
+
+##################################################Register logic yet to finalize & fix#################
 @app.route('/add_spare_part', methods=['POST'])
 @login_required
 def add_spare_part():
