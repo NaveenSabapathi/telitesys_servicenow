@@ -14,6 +14,7 @@ from werkzeug.utils import secure_filename
 from crm.routes import crm_bp
 from models import db
 from config import Config
+from inventory.routes import inventory_bp
 
 
 
@@ -26,9 +27,11 @@ app.config.from_object(Config)
 csrf = CSRFProtect(app)
 
 
+
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
 app.register_blueprint(crm_bp, url_prefix="/crm")
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+app.register_blueprint(inventory_bp, url_prefix='/inventory')
 
 db.init_app(app)
 
@@ -63,6 +66,7 @@ def login():
         try:
             # Validate CSRF token
             csrf_token = request.form.get('csrf_token')
+            print(csrf_token)
             validate_csrf(csrf_token)
         except CSRFError:
             flash("CSRF token is missing or invalid.", "error")

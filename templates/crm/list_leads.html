@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Leads{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Leads</h3>
+    <a href="{{ url_for('crm.add_lead') }}" class="btn btn-success">Add Lead</a>
+  </div>
+
+  <form class="form-inline mb-3">
+    <input class="form-control mr-2" type="search" name="q" placeholder="Search name/phone/company" value="{{ request.args.get('q','') }}">
+    <select name="status" class="form-control mr-2">
+      <option value="">All status</option>
+      {% for s in ['New','Contacted','Quoted','Negotiation','Converted','Lost'] %}
+        <option value="{{ s }}" {% if request.args.get('status')==s %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+    <select name="assigned" class="form-control mr-2">
+      <option value="">All</option>
+      <option value="me" {% if request.args.get('assigned')=='me' %}selected{% endif %}>Assigned to me</option>
+    </select>
+    <button class="btn btn-primary" type="submit">Filter</button>
+  </form>
+
+  <table class="table table-striped">
+    <thead>
+      <tr><th>Name</th><th>Phone</th><th>Company</th><th>Source</th><th>Status</th><th>Priority</th><th>Assigned</th><th>Next Follow-up</th><th>Action</th></tr>
+    </thead>
+    <tbody>
+      {% for lead in leads %}
+      <tr>
+        <td>{{ lead.name }}</td>
+        <td>{{ lead.phone }}</td>
+        <td>{{ lead.company or '-' }}</td>
+        <td>{{ lead.source or '-' }}</td>
+        <td>{{ lead.status }}</td>
+        <td>{{ lead.priority }}</td>
+        <td>
+          {% if lead.assigned_to %}
+            {% set u = users | selectattr('id','equalto', lead.assigned_to) | list | first %}
+            {{ u.username if u else lead.assigned_to }}
+          {% else %}
+            —
+          {% endif %}
+        </td>
+        <td>{{ lead.next_follow_up and lead.next_follow_up.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td><a class="btn btn-sm btn-primary" href="{{ url_for('crm.view_lead', lead_id=lead.id) }}">View</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="9">No leads</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Inventory Dashboard{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4>Inventory Dashboard</h4>
+    <div>
+      <a href="{{ url_for('inventory.inventory_dashboard') }}" class="btn btn-outline-secondary btn-sm">Refresh</a>
+      <a href="{{ url_for('inventory.stock_table') }}" class="btn btn-primary btn-sm">Stock Table</a>
+      <a href="{{ url_for('inventory.recent_transactions') }}" class="btn btn-outline-primary btn-sm">Recent Activity</a>
+      <a href="{{ url_for('inventory.goods_in_add') }}" class="btn btn-success btn-sm">Goods In</a>
+      <a href="{{ url_for('inventory.goods_out_add') }}" class="btn btn-danger btn-sm">Goods Out</a>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-6 col-md-3">
+      <div class="card p-3">
+        <small class="text-muted">Items</small>
+        <h3 class="mb-0">{{ total_items }}</h3>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card p-3">
+        <small class="text-muted">Total Serials</small>
+        <h3 class="mb-0">{{ total_serials }}</h3>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card p-3">
+        <small class="text-muted">In Stock</small>
+        <h3 class="mb-0 text-success">{{ in_count }}</h3>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card p-3">
+        <small class="text-muted">Dispatched</small>
+        <h3 class="mb-0 text-danger">{{ out_count }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <h6>Recent Goods In</h6>
+      <ul class="list-group">
+        {% for gi in recent_in %}
+          <li class="list-group-item small">
+            <strong>{{ gi.ref_no or '—' }}</strong> — {{ gi.vendor or '—' }}
+            <div class="text-muted small">{{ gi.arrived_date and gi.arrived_date.strftime('%Y-%m-%d %H:%M') or gi.created_at.strftime('%Y-%m-%d') }}</div>
+          </li>
+        {% else %}
+          <li class="list-group-item small text-muted">No recent goods in</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="col-md-6">
+      <h6>Recent Goods Out</h6>
+      <ul class="list-group">
+        {% for go in recent_out %}
+          <li class="list-group-item small">
+            <strong>{{ go.ref_no or '—' }}</strong> — {{ go.to_customer or '—' }}
+            <div class="text-muted small">{{ go.sent_date and go.sent_date.strftime('%Y-%m-%d %H:%M') or go.created_at.strftime('%Y-%m-%d') }}</div>
+          </li>
+        {% else %}
+          <li class="list-group-item small text-muted">No recent goods out</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

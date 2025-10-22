@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Stock Table{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4>Stock — Serials</h4>
+    <div>
+      <a href="{{ url_for('inventory.inventory_dashboard') }}" class="btn btn-outline-secondary btn-sm">Back</a>
+      <a href="{{ url_for('inventory.goods_in_add') }}" class="btn btn-success btn-sm">Goods In</a>
+      <a href="{{ url_for('inventory.goods_out_add') }}" class="btn btn-danger btn-sm">Goods Out</a>
+    </div>
+  </div>
+
+  <form class="row g-2 mb-3" method="get">
+    <div class="col-6 col-md-3">
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="search serial / item / billed to">
+    </div>
+    <div class="col-4 col-md-2">
+      <select name="status" class="form-select">
+        <option value="">All status</option>
+        {% for s in statuses %}
+          <option value="{{ s }}" {% if status==s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-auto">
+      <button class="btn btn-primary btn-sm">Filter</button>
+    </div>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table table-striped table-sm">
+      <thead>
+        <tr><th>Item</th><th>Serial</th><th>Status</th><th>Billed To</th><th>Location</th><th>Arrived</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for s in serials %}
+        <tr>
+          <td>{{ s.item.name }}</td>
+          <td>{{ s.serial_number }}</td>
+          <td>
+            {% if s.status=='IN' %}<span class="badge bg-success">IN</span>
+            {% elif s.status=='OUT' %}<span class="badge bg-danger">OUT</span>
+            {% else %}<span class="badge bg-secondary">{{ s.status }}</span>{% endif %}
+          </td>
+          <td>{{ s.billed_to or '-' }}</td>
+          <td>{{ s.location or '-' }}</td>
+          <td>{{ s.arrived_date and s.arrived_date.strftime('%Y-%m-%d') or s.created_at.strftime('%Y-%m-%d') }}</td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary js-lookup" data-serial="{{ s.serial_number }}">Lookup</button>
+            <a href="#" class="btn btn-sm btn-outline-secondary" onclick="changeStatus({{ s.id }}, 'DAMAGED')">Mark Damaged</a>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="text-muted small">No serials found</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% block scripts %}
+<script>
+function changeStatus(serialId, newStatus) {
+  if (!confirm("Change status to " + newStatus + "?")) return;
+  fetch("{{ url_for('inventory.api_change_serial_status', serial_id=0) }}".replace('/0/','/' + serialId + '/'), {
+    method:'POST',
+    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body: 'status=' + encodeURIComponent(newStatus) + '&csrf_token={{ csrf_token }}'
+  }).then(r=>r.json()).then(j=>{
+    if (j.success) location.reload(); else alert('Failed');
+  }).catch(e=>{console.error(e); alert('Network error')});
+}
+
+// live lookup on button
+document.addEventListener('click', function(e){
+  if (e.target && e.target.classList.contains('js-lookup')) {
+    const sn = e.target.dataset.serial;
+    if (!sn) return;
+    fetch("{{ url_for('inventory.api_serial_lookup') }}?serial=" + encodeURIComponent(sn))
+      .then(r=>r.json()).then(data=>{
+        if (data && data.length) {
+          const d = data[0];
+          alert('Found: ' + d.item_name + ' — ' + d.serial_number + ' (' + d.status + ')');
+        } else {
+          alert('No match');
+        }
+      }).catch(err=>{ console.error(err); alert('Error')});
+  }
+});
+</script>
+{% endblock %}
+{% endblock %}

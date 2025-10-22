@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Lead Detail{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-8">
+      <h3>{{ lead.name }} <small class="text-muted">({{ lead.phone }})</small></h3>
+      <dl class="row">
+        <dt class="col-sm-3">Email</dt><dd class="col-sm-9">{{ lead.email or '-' }}</dd>
+        <dt class="col-sm-3">Company</dt><dd class="col-sm-9">{{ lead.company or '-' }}</dd>
+        <dt class="col-sm-3">Source</dt><dd class="col-sm-9">{{ lead.source or '-' }}</dd>
+        <dt class="col-sm-3">Status</dt><dd class="col-sm-9">{{ lead.status }}</dd>
+        <dt class="col-sm-3">Priority</dt><dd class="col-sm-9">{{ lead.priority }}</dd>
+        <dt class="col-sm-3">Estimated</dt><dd class="col-sm-9">₹{{ lead.estimated_value }}</dd>
+        <dt class="col-sm-3">Next Follow-up</dt><dd class="col-sm-9">{{ lead.next_follow_up and lead.next_follow_up.strftime('%Y-%m-%d %H:%M') }}</dd>
+      </dl>
+
+      <hr>
+      <h5>Notes</h5>
+      {% for n in notes %}
+        <div class="card mb-2"><div class="card-body"><small class="text-muted">{{ n.created_at.strftime('%Y-%m-%d %H:%M') }} by {{ n.author.username }}</small><p>{{ n.note }}</p></div></div>
+      {% else %}
+        <p>No notes yet.</p>
+      {% endfor %}
+
+      <form method="post" action="{{ url_for('crm.add_note', lead_id=lead.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group"><textarea name="note" class="form-control" rows="3" placeholder="Add note..."></textarea></div>
+        <button class="btn btn-primary">Add Note</button>
+      </form>
+
+      <hr>
+      <h5>Follow-ups</h5>
+      {% for fu in followups %}
+        <div class="card mb-2"><div class="card-body"><small class="text-muted">{{ fu.followup_date and fu.followup_date.strftime('%Y-%m-%d %H:%M') }}{% if fu.completed %} — Completed{% endif %}</small><p>{{ fu.note }}</p></div></div>
+      {% else %}
+        <p>No follow-ups scheduled.</p>
+      {% endfor %}
+      <a href="{{ url_for('crm.add_followup', lead_id=lead.id) }}" class="btn btn-secondary btn-sm">Add Follow-up</a>
+
+    </div>
+
+    <div class="col-md-4">
+      <h5>Quick Actions</h5>
+      <form method="post" action="{{ url_for('crm.update_status', lead_id=lead.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+          <label>Status</label>
+          <select name="status" class="form-control">
+            {% for s in ['New','Contacted','Quoted','Negotiation','Converted','Lost'] %}
+              <option value="{{ s }}" {% if lead.status==s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button class="btn btn-sm btn-success mb-2">Update Status</button>
+      </form>
+
+      <form method="post" action="{{ url_for('crm.assign_lead', lead_id=lead.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+          <label>Assign To</label>
+          <select name="user_id" class="form-control">
+            {% for user in users %}
+              <option value="{{ user.id }}" {% if lead.assigned_to==user.id %}selected{% endif %}>{{ user.username }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button class="btn btn-sm btn-primary mb-2">Assign</button>
+      </form>
+
+      <form method="post" action="{{ url_for('crm.convert_lead', lead_id=lead.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-warning btn-block">Convert to Customer</button>
+      </form>
+
+      <hr>
+      <h6>Timeline</h6>
+      {% for t in timeline %}
+        <div class="mb-2"><small class="text-muted">{{ t.created_at.strftime('%Y-%m-%d %H:%M') }}</small><div>{{ t.event_type }} - {{ t.meta }}</div></div>
+      {% else %}
+        <p>No timeline events.</p>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

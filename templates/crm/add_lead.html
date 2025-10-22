@@ -1,34 +1,107 @@
-{# templates/crm/add_lead.html #}
+
 {% extends "base.html" %}
 {% block title %}Add Lead{% endblock %}
+
+
 {% block content %}
 <div class="container mt-4">
-    <h2>Add New Lead</h2>
-    <form method="POST">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" class="form-control" name="name" required>
+  <h3>Add Lead</h3>
+  <form method="post" id="leadForm">
+    <!-- Use the injected token value (not the function) -->
+    <input type="hidden" name="csrf_token" value="{{ csrf_token ()}}">
+    <div class="form-row">
+      <div class="form-group col-md-6">{{ form.name.label }} {{ form.name(class="form-control") }}</div>
+      <div class="form-group col-md-6">{{ form.phone.label }} {{ form.phone(class="form-control") }}</div>
+    </div>
+    <div class="form-row">
+      <div class="form-group col-md-6">{{ form.email.label }} {{ form.email(class="form-control") }}</div>
+      <div class="form-group col-md-6">{{ form.company.label }} {{ form.company(class="form-control") }}</div>
+    </div>
+    <div class="form-row">
+      <div class="form-group col-md-4">{{ form.source.label }} {{ form.source(class="form-control") }}</div>
+      <div class="form-group col-md-4">{{ form.priority.label }} {{ form.priority(class="form-control") }}</div>
+      <div class="form-group col-md-4">{{ form.estimated_value.label }} {{ form.estimated_value(class="form-control") }}</div>
+    </div>
+
+    <!-- Next follow-up: date picker + optional time -->
+    <div class="form-group">
+      <label for="next_follow_up_date">Next Follow-up</label>
+      <div class="input-group">
+        <input type="text" id="next_follow_up_date" class="form-control" placeholder="Choose a date" autocomplete="off"
+               value="{{ form.next_follow_up.data and form.next_follow_up.data.strftime('%Y-%m-%d') or '' }}">
+        <div class="input-group-append">
+          <div class="input-group-text">
+            <input type="checkbox" id="enable_time" aria-label="Add time"> &nbsp; Add time
+          </div>
         </div>
-        <div class="form-group">
-            <label for="phone">Phone</label>
-            <input type="text" class="form-control" name="phone" required>
-        </div>
-        <div class="form-group">
-            <label for="source">Source</label>
-            <input type="text" class="form-control" name="source">
-        </div>
-        <div class="form-group">
-            <label for="status">Status</label>
-            <select name="status" class="form-control">
-                <option value="new">New</option>
-                <option value="contacted">Contacted</option>
-                <option value="converted">Converted</option>
-                <option value="lost">Lost</option>
-            </select>
-        </div>
-        <button type="submit" class="btn btn-primary">Add Lead</button>
-    </form>
+      </div>
+      <small class="form-text text-muted">Pick a date using the calendar. Optionally add a time.</small>
+
+      <div id="time_container" style="display:none; margin-top:8px;">
+        <input type="time" id="next_follow_up_time" class="form-control"
+               value="{{ form.next_follow_up.data and form.next_follow_up.data.strftime('%H:%M') or '' }}" />
+        <small class="form-text text-muted">Optional time (HH:MM)</small>
+      </div>
+
+      <!-- This hidden field is what the server will read -->
+      <input type="hidden" name="next_follow_up" id="next_follow_up_hidden" value="">
+    </div>
+
+    <div class="form-group">{{ form.note.label }} {{ form.note(class="form-control") }}</div>
+    <button class="btn btn-success" type="submit">Create Lead</button>
+  </form>
 </div>
 {% endblock %}
 
+{% block scripts %}
+  <!-- flatpickr JS (can be moved to base.html scripts) -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // initialize flatpickr for the date input
+    flatpickr("#next_follow_up_date", {
+      dateFormat: "Y-m-d",
+      altInput: false,
+      allowInput: true,
+      defaultDate: document.getElementById('next_follow_up_date').value || null
+    });
+
+    const enableTime = document.getElementById('enable_time');
+    const timeContainer = document.getElementById('time_container');
+    const timeInput = document.getElementById('next_follow_up_time');
+    const dateInput = document.getElementById('next_follow_up_date');
+    const hiddenInput = document.getElementById('next_follow_up_hidden');
+    const form = document.getElementById('leadForm');
+
+    // If a time value exists on load, show the time container & check the box
+    if (timeInput.value && timeInput.value.trim() !== "") {
+      enableTime.checked = true;
+      timeContainer.style.display = 'block';
+    }
+
+    enableTime.addEventListener('change', function () {
+      timeContainer.style.display = enableTime.checked ? 'block' : 'none';
+      if (!enableTime.checked) {
+        timeInput.value = '';
+      }
+    });
+
+    // On submit, combine date + optional time into hidden input
+    form.addEventListener('submit', function (e) {
+      const dateVal = dateInput.value && dateInput.value.trim();
+      const timeVal = timeInput.value && timeInput.value.trim();
+
+      if (dateVal && timeVal) {
+        hiddenInput.value = `${dateVal} ${timeVal}`;
+      } else if (dateVal) {
+        hiddenInput.value = dateVal;
+      } else {
+        hiddenInput.value = '';
+      }
+
+      // allow next_follow_up to be optional; do not block submit
+    });
+  });
+  </script>
+{% endblock %}

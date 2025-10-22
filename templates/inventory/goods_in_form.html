@@ -1,0 +1,352 @@
+{% extends "base.html" %}
+{% block title %}Goods In — Inventory{% endblock %}
+
+{% block head_extra %}
+  <!-- Bootstrap 5 + flatpickr CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <style>
+    /* Minor niceties */
+    .row-handle { cursor: move; }
+    .small-input { min-width: 120px; }
+    @media (max-width: 576px) {
+      .table-responsive { font-size: .92rem; }
+      .small-input { min-width: 90px; }
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h4 class="mb-0"><i class="fa fa-box-circle-check"></i> Goods In</h4>
+      <small class="text-muted">Record arrivals | track serials</small>
+    </div>
+    <div>
+      <a href="{{ url_for('inventory.inventory_dashboard') }}" class="btn btn-outline-secondary btn-sm me-2"><i class="fa fa-chart-pie"></i> Inventory</a>
+      <a href="{{ url_for('inventory.goods_in_add') }}" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> New</a>
+    </div>
+  </div>
+
+  <form id="goodsInForm" method="post" class="card shadow-sm p-3">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="row g-2">
+      <div class="col-12 col-md-4">
+        <label class="form-label">Ref / Invoice #</label>
+        <input name="ref_no" class="form-control" placeholder="GRN / Invoice">
+      </div>
+      <div class="col-12 col-md-4">
+        <label class="form-label">Vendor / Purchase From</label>
+        <input name="vendor" class="form-control" placeholder="Vendor name">
+      </div>
+      <div class="col-12 col-md-4">
+        <label class="form-label">Arrived Date</label>
+        <div class="input-group">
+          <input id="arrived_date" name="arrived_date_visible" class="form-control small-input" placeholder="YYYY-MM-DD">
+          <button type="button" class="btn btn-outline-secondary" id="toggleArrivedTime">Add Time</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="arrived_time_row" class="row g-2 mt-2" style="display:none;">
+      <div class="col-12 col-md-4">
+        <label class="form-label">Arrived Time</label>
+        <input id="arrived_time" type="time" class="form-control">
+      </div>
+      <div class="col-12 col-md-8 align-self-end">
+        <small class="text-muted">Time is optional — leave blank if unknown</small>
+      </div>
+    </div>
+
+    <hr class="my-3">
+
+    <div class="table-responsive">
+      <table class="table table-borderless align-middle" id="linesTable">
+        <thead class="small text-muted">
+          <tr>
+            <th style="width:36%;">Item</th>
+            <th style="width:36%;">Serial Number</th>
+            <th style="width:20%;">Billed To</th>
+            <th style="width:8%;" class="text-end">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="line-row">
+            <td>
+              <!-- item select with Add New option -->
+              <div class="input-group input-group-sm">
+                <select name="item_id[]" class="form-select select-item" required>
+                  <option value="" selected disabled>Select item</option>
+                  {% for it in items %}
+                    <option value="{{ it.id }}">{{ it.name }}</option>
+                  {% endfor %}
+                  <option value="__new__">+ Add New Item</option>
+                </select>
+              </div>
+            </td>
+            <td><input name="serial_number[]" class="form-control form-control-sm" placeholder="SN / Serial" required></td>
+            <td><input name="billed_to[]" class="form-control form-control-sm" placeholder="Optional"></td>
+            <td class="text-end">
+              <button type="button" class="btn btn-sm btn-danger remove-row" title="Remove row">&times;</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button type="button" id="addRow" class="btn btn-sm btn-outline-secondary"><i class="fa fa-plus"></i> Add Row</button>
+      <button type="submit" class="btn btn-primary ms-auto"><i class="fa fa-save"></i> Save Goods In</button>
+    </div>
+
+    <div id="formAlert" class="mt-3" style="display:none;"></div>
+  </form>
+
+  <!-- place modal OUTSIDE the form to avoid nested-form validation issues -->
+  <!-- Add Item Modal (reused) -->
+  <div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <!-- novalidate prevents the browser native validation UI; we handle it in JS -->
+        <form id="addItemForm" autocomplete="off" novalidate>
+          <div class="modal-header">
+            <h5 class="modal-title" id="addItemModalLabel">Add New Item</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div id="addItemAlert" class="alert d-none" role="alert"></div>
+            <div class="mb-2">
+              <label class="form-label small">Item name (max 100 chars)</label>
+              <input id="new_item_name" name="name" maxlength="100" class="form-control" required placeholder="Example: HP Charger 65W">
+            </div>
+            <div class="mb-2">
+              <label class="form-label small">Item type (optional)</label>
+              <input id="new_item_type" name="item_type" maxlength="50" class="form-control" placeholder="Accessory / Laptop / Spare">
+            </div>
+            <input type="hidden" id="add_item_target_select_index" value="">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Add Item</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- end modal -->
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+  (function(){
+    const addRowBtn = document.getElementById('addRow');
+    const linesTable = document.getElementById('linesTable').querySelector('tbody');
+    const templateRow = linesTable.querySelector('.line-row').cloneNode(true);
+    const toggleTime = document.getElementById('toggleArrivedTime');
+    const arrivedTimeRow = document.getElementById('arrived_time_row');
+    const arrivedDate = document.getElementById('arrived_date');
+    const arrivedTime = document.getElementById('arrived_time');
+    const form = document.getElementById('goodsInForm');
+    const alertBox = document.getElementById('formAlert');
+
+    // flatpickr date only
+    flatpickr("#arrived_date", { dateFormat: "Y-m-d", allowInput: true });
+
+    // Add row
+    addRowBtn.addEventListener('click', () => {
+      const newRow = templateRow.cloneNode(true);
+      newRow.querySelectorAll('input').forEach(i => i.value = '');
+      newRow.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+      linesTable.appendChild(newRow);
+    });
+
+    // Remove row (delegated)
+    linesTable.addEventListener('click', (e) => {
+      if (e.target && e.target.classList.contains('remove-row')) {
+        const rows = linesTable.querySelectorAll('tr');
+        if (rows.length <= 1) { // keep at least one
+          rows[0].querySelectorAll('input, select').forEach(i=> i.value = '');
+          return;
+        }
+        e.target.closest('tr').remove();
+      }
+    });
+
+    toggleTime.addEventListener('click', () => {
+      if (arrivedTimeRow.style.display === 'none') {
+        arrivedTimeRow.style.display = 'flex';
+      } else arrivedTimeRow.style.display = 'none';
+    });
+
+    // Simple validation before submit
+    form.addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      alertBox.style.display = 'none'; alertBox.className = '';
+      const itemSelects = form.querySelectorAll('select[name="item_id[]"]');
+      const serialInputs = form.querySelectorAll('input[name="serial_number[]"]');
+      let ok = true;
+      const seen = new Set();
+      for (let i = 0; i < itemSelects.length; i++) {
+        const it = itemSelects[i].value.trim();
+        const sn = serialInputs[i].value.trim();
+        if (!it || !sn) { ok = false; break; }
+        const key = it + '::' + sn.toLowerCase();
+        if (seen.has(key)) { ok = false; break; }
+        seen.add(key);
+      }
+      if (!ok) {
+        alertBox.style.display = 'block';
+        alertBox.className = 'alert alert-danger';
+        alertBox.textContent = 'Please provide item and serial for each row and avoid duplicate serials for the same item.';
+        return;
+      }
+      // combine arrived date+time to a single field name arrived_date for backend
+      const hidden = document.createElement('input');
+      hidden.type = 'hidden'; hidden.name = 'arrived_date';
+      const dateVal = arrivedDate.value.trim();
+      const timeVal = arrivedTime.value.trim();
+      hidden.value = dateVal ? (timeVal ? (dateVal + ' ' + timeVal) : dateVal) : '';
+      form.appendChild(hidden);
+      form.submit();
+    });
+  })();
+  </script>
+
+  <script>
+  (function(){
+    // store the select element that requested 'Add New' so we can update it later
+    let activeSelect = null;
+
+    // delegate change events for selects
+    document.addEventListener('change', function (e) {
+      if (!e.target || !e.target.classList.contains('select-item')) return;
+      if (e.target.value !== '__new__') return;
+
+      // when user chooses 'Add New Item' option
+      activeSelect = e.target;
+
+      // reset modal inputs
+      document.getElementById('new_item_name').value = '';
+      document.getElementById('new_item_type').value = '';
+      document.getElementById('addItemAlert').classList.add('d-none');
+      // show bootstrap modal
+      const addModal = new bootstrap.Modal(document.getElementById('addItemModal'), {backdrop: 'static'});
+      addModal.show();
+    });
+
+    // handle modal form submit (AJAX)
+    document.getElementById('addItemForm').addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      const name = document.getElementById('new_item_name').value.trim();
+      const item_type = document.getElementById('new_item_type').value.trim();
+      const alertBox = document.getElementById('addItemAlert');
+
+      if (!name) {
+        alertBox.className = 'alert alert-danger';
+        alertBox.textContent = 'Item name is required.';
+        alertBox.classList.remove('d-none');
+        return;
+      }
+      if (name.length > 100) {
+        alertBox.className = 'alert alert-danger';
+        alertBox.textContent = 'Item name must be 100 characters or less.';
+        alertBox.classList.remove('d-none');
+        return;
+      }
+
+      // prepare POST body (urlencoded)
+      const body = new URLSearchParams();
+      body.append('name', name);
+      body.append('item_type', item_type || '');
+      body.append('csrf_token', '{{ csrf_token() }}');
+
+      fetch("{{ url_for('inventory.api_add_item') }}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body.toString(),
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (!data || !data.success) {
+          alertBox.className = 'alert alert-danger';
+          alertBox.textContent = data && data.error ? data.error : 'Failed to create item';
+          alertBox.classList.remove('d-none');
+          return;
+        }
+
+        // close modal
+        const addModalEl = document.getElementById('addItemModal');
+        const modalInstance = bootstrap.Modal.getInstance(addModalEl);
+        if (modalInstance) modalInstance.hide();
+
+        // create new option and select it in the activeSelect
+        if (activeSelect) {
+          const addOpt = activeSelect.querySelector('option[value="__new__"]');
+          const newOpt = document.createElement('option');
+          newOpt.value = data.item_id;
+          newOpt.textContent = data.name;
+          // insert before "+ Add New Item" option so it's available next time
+          addOpt.parentNode.insertBefore(newOpt, addOpt);
+          newOpt.selected = true;
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alertBox.className = 'alert alert-danger';
+        alertBox.textContent = 'Network error while creating item.';
+        alertBox.classList.remove('d-none');
+      });
+    });
+
+    // If user cancels modal, reset the active select to first option
+    document.getElementById('addItemModal').addEventListener('hidden.bs.modal', function () {
+      if (activeSelect) {
+        // reset to blank (first option)
+        activeSelect.selectedIndex = 0;
+        activeSelect = null;
+      }
+    });
+  })();
+  </script>
+
+  <script>
+  document.addEventListener('input', function (e) {
+    // watch for inputs with name serial_number[] (delegated)
+    if (!e.target) return;
+    const el = e.target;
+    if (el.name !== 'serial_number[]') return;
+    const val = el.value && el.value.trim();
+    if (!val || val.length < 3) return; // wait for enough chars
+
+    // debounce per element
+    if (el._lookupTimer) clearTimeout(el._lookupTimer);
+    el._lookupTimer = setTimeout(() => {
+      fetch("{{ url_for('inventory.api_serial_lookup') }}?serial=" + encodeURIComponent(val))
+        .then(r=>r.json())
+        .then(results=>{
+          if (!results || results.length === 0) {
+            // no auto-match
+            return;
+          }
+          // pick first match and set the corresponding item select in same row
+          const row = el.closest('tr');
+          if (!row) return;
+          const select = row.querySelector('select[name="item_id[]"]');
+          if (!select) return;
+          const match = results[0];
+          // if item matches, set select value
+          if (match.item_id) {
+            select.value = match.item_id;
+          }
+        })
+        .catch(err=>console.error('lookup err', err));
+    }, 300);
+  });
+  </script>
+{% endblock %}

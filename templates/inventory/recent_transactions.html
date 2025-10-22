@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Recent Inventory Activity{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <div class="d-flex justify-content-between">
+    <h4>Recent Inventory Activity</h4>
+    <div>
+      <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('inventory.inventory_dashboard') }}">Back</a>
+    </div>
+  </div>
+
+  <div class="row mt-3">
+    <div class="col-md-6">
+      <h6>Goods In</h6>
+      <ul class="list-group">
+        {% for gi in recent_in %}
+          <li class="list-group-item">
+            <strong>{{ gi.ref_no or '—' }}</strong><br>
+            <small class="text-muted">{{ gi.vendor or '-' }} • {{ gi.arrived_date and gi.arrived_date.strftime('%Y-%m-%d %H:%M') or gi.created_at.strftime('%Y-%m-%d') }}</small>
+            <div class="mt-1 small">
+              {% for line in gi.lines %}
+                <div>{{ line.item.name if line.item else line.item_id }} — {{ line.serial_number }}</div>
+              {% endfor %}
+            </div>
+          </li>
+        {% else %}
+          <li class="list-group-item small text-muted">No recent goods in</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="col-md-6">
+      <h6>Goods Out</h6>
+      <ul class="list-group">
+        {% for go in recent_out %}
+          <li class="list-group-item">
+            <strong>{{ go.ref_no or '—' }}</strong><br>
+            <small class="text-muted">{{ go.to_customer or '-' }} • {{ go.sent_date and go.sent_date.strftime('%Y-%m-%d %H:%M') or go.created_at.strftime('%Y-%m-%d') }}</small>
+            <div class="mt-1 small">
+              {% for line in go.lines %}
+                <div>{{ line.item.name if line.item else line.item_id }} — {{ line.serial_number }}</div>
+              {% endfor %}
+            </div>
+          </li>
+        {% else %}
+          <li class="list-group-item small text-muted">No recent goods out</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}
