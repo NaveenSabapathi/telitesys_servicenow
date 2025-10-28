@@ -3,181 +3,346 @@
 {% block title %}Dashboard - Breeze Computers{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <h1 class="mb-4">Device Overview</h1>
+<style>
+/* ---------- Layout basics ---------- */
+:root{
+  --sidebar-w: 240px;
+  --sidebar-bg: #202428;
+  --accent: #0d6efd;
+  --card-bg: #fff;
+  --muted: #6c757d;
+}
 
-    <div class="row g-4 mb-4">
-        <div class="col-md-4">
-            <a href="{{ url_for('add_device') }}" class="text-decoration-none text-dark">
-                <div class="card shadow-sm h-100 border-primary">
-                    <div class="card-body text-center">
-                        <h5 class="card-title text-primary">Add New Device</h5>
-                        <p class="display-6"><i class="bi bi-plus-circle"></i></p>
-                        <div class="progress">
-                            <div class="progress-bar bg-primary" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-    </div>
+body { background: #f6f7fb; }
 
-    <div class="row g-4">
-        <!-- Assigned Devices -->
-        <div class="col-md-4">
-            <a href="{{ url_for('assigned_devices') }}" class="text-decoration-none text-dark">
-                <div class="card shadow-sm h-100">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Assigned Devices</h5>
-                        <p class="display-6">{{ assigned_devices_count }}</p>
-                        {% set total_assigned_pool = assigned_devices_count + unassigned_devices_count %}
-                        <div class="progress">
-                            <div class="progress-bar bg-success" role="progressbar"
-                                style="width: {% if total_assigned_pool > 0 %}{{ (assigned_devices_count / total_assigned_pool) * 100 }}{% else %}0{% endif %}%"
-                                aria-valuenow="{{ (assigned_devices_count / total_assigned_pool) * 100 if total_assigned_pool > 0 else 0 }}"
-                                aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
+/* wrapper is just a logical container */
+.wrapper {
+  min-height: calc(100vh - 56px); /* account for fixed top navbar (56px in your base) */
+}
 
-        <!-- Unassigned Devices -->
-        <div class="col-md-4">
-            <a href="{{ url_for('device_assign') }}" class="text-decoration-none text-dark">
-                <div class="card shadow-sm h-100">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Unassigned Devices</h5>
-                        <p class="display-6">{{ unassigned_devices_count }}</p>
-                        <div class="progress">
-                            <div class="progress-bar bg-info" role="progressbar"
-                                style="width: {% if total_assigned_pool > 0 %}{{ (unassigned_devices_count / total_assigned_pool) * 100 }}{% else %}0{% endif %}%"
-                                aria-valuenow="{{ (unassigned_devices_count / total_assigned_pool) * 100 if total_assigned_pool > 0 else 0 }}"
-                                aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
+/* ---------- Sidebar (fixed) ---------- */
+.sidebar {
+  position: fixed;
+  top: 56px;               /* below top navbar */
+  left: 0;
+  width: var(--sidebar-w);
+  height: calc(100vh - 56px);
+  background: var(--sidebar-bg);
+  color: #fff;
+  z-index: 1100;
+  padding-top: 10px;
+  transition: transform 320ms cubic-bezier(.2,.9,.2,1);
+  transform: translateX(0); /* visible by default */
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  overflow-y: auto;
+}
 
-        <!-- Unbilled Devices -->
-        <div class="col-md-4">
-            <a href="{{ url_for('delivery_ready') }}" class="text-decoration-none text-dark">
-                <div class="card shadow-sm h-100">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Unbilled Devices</h5>
-                        <p class="display-6">{{ unbilled_devices_count }}</p>
-                        {% set total_billing_pool = unbilled_devices_count + delivery_ready_devices %}
-                        <div class="progress">
-                            <div class="progress-bar bg-warning" role="progressbar"
-                                style="width: {% if total_billing_pool > 0 %}{{ (unbilled_devices_count / total_billing_pool) * 100 }}{% else %}0{% endif %}%"
-                                aria-valuenow="{{ (unbilled_devices_count / total_billing_pool) * 100 if total_billing_pool > 0 else 0 }}"
-                                aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
+/* hidden state: slide fully left */
+.sidebar.hidden {
+  transform: translateX(calc(-1 * var(--sidebar-w)));
+}
 
-        <!-- Delivery Awaiting -->
-        <div class="col-md-4">
-            <a href="{{ url_for('closed_devices') }}" class="text-decoration-none text-dark">
-                <div class="card shadow-sm h-100">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Delivery Awaiting</h5>
-                        <p class="display-6">{{ delivery_ready_devices }}</p>
-                        <div class="progress">
-                            <div class="progress-bar bg-danger" role="progressbar"
-                                style="width: {% if total_billing_pool > 0 %}{{ (delivery_ready_devices / total_billing_pool) * 100 }}{% else %}0{% endif %}%"
-                                aria-valuenow="{{ (delivery_ready_devices / total_billing_pool) * 100 if total_billing_pool > 0 else 0 }}"
-                                aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
+/* Sidebar list */
+.sidebar ul { list-style: none; padding: 0; margin: 0; }
+.sidebar li { border-top: 1px solid rgba(255,255,255,0.03); }
+.sidebar a {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:14px 18px;
+  color: #e9eef9;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background 160ms ease, color 160ms ease;
+}
+.sidebar a:hover, .sidebar a.active {
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+}
+.sidebar i { font-size: 1.25rem; width: 28px; text-align:center; }
 
-        <!-- Service Time Overlap -->
-        <div class="col-md-4">
-            <a href="{{ url_for('device_time_overlap') }}" class="text-decoration-none text-dark">
-                <div class="card shadow-sm h-100">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Service Time Overlap</h5>
-                        <p class="display-6">{{ pending_delivery_count }}</p>
-                        <div class="progress">
-                            <div class="progress-bar bg-danger" role="progressbar"
-                                style="width: {% if total_billing_pool > 0 %}{{ (delivery_ready_devices / total_billing_pool) * 100 }}{% else %}0{% endif %}%"
-                                aria-valuenow="{{ (delivery_ready_devices / total_billing_pool) * 100 if total_billing_pool > 0 else 0 }}"
-                                aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
+/* Hide floating toggle on narrow screens */
+@media (max-width: 576px) {
+  .toggle-btn {
+    display: none !important;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
 
-        <!-- Closed Devices -->
-        <div class="col-md-4">
-            <a href="{{ url_for('closed_device_history') }}" class="text-decoration-none text-dark">
-                <div class="card shadow-sm h-100">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Closed Device History</h5>
-                        <p class="display-6">{{ closed_device_history }} <i class="bi bi-archive"></i></p>
-                        <div class="progress">
-                            <div class="progress-bar bg-secondary" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
 
-        <!-- Bill Processed Today -->
-        <div class="col-md-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Bill Processed Today</h5>
-                    <p class="display-6">{{ bill_today }}</p>
-                </div>
-            </div>
-        </div>
-    </div>
+/* ---------- Overlay for small screens ---------- */
+.sidebar-overlay {
+  display:none;
+  position: fixed;
+  z-index: 1050;
+  inset: 56px 0 0 0; /* below navbar */
+  background: rgba(0,0,0,0.45);
+  transition: opacity 240ms ease;
+  opacity: 0;
+  pointer-events: none;
+}
+.sidebar-overlay.visible {
+  display:block;
+  opacity: 1;
+  pointer-events: auto;
+}
 
-    <!-- CRM Cards Row -->
-    <div class="row g-4 mt-2">
-        <!-- CRM Leads -->
-        <div class="col-md-6">
-            <a href="{{ url_for('crm.list_leads') }}" class="text-decoration-none text-dark">
-                <div class="card shadow-sm border-info h-100">
-                    <div class="card-body text-center">
-                        <h5 class="card-title text-info">CRM Leads</h5>
-                        <p class="display-6"><i class="bi bi-person-lines-fill"></i></p>
-                        <div class="progress">
-                            <div class="progress-bar bg-info" role="progressbar" style="width:100%"></div>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
+/* ---------- Toggle button ---------- */
+.toggle-btn {
+  position: fixed;
+  top: 66px;
+  left: calc(var(--sidebar-w) + 12px);
+  z-index: 1200;
+  background: var(--accent);
+  border: none;
+  color: white;
+  padding: 8px 11px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 6px 16px rgba(13,110,253,0.18);
+  transition: left 320ms cubic-bezier(.2,.9,.2,1);
+}
 
-        <!-- Add Lead -->
-        <div class="col-md-6">
-            <a href="{{ url_for('crm.add_lead') }}" class="text-decoration-none text-dark">
-                <div class="card shadow-sm border-success h-100">
-                    <div class="card-body text-center">
-                        <h5 class="card-title text-success">Add New Lead</h5>
-                        <p class="display-6"><i class="bi bi-person-plus"></i></p>
-                        <div class="progress">
-                            <div class="progress-bar bg-success" role="progressbar" style="width:100%"></div>
-                        </div>
-                    </div>
-                </div>
-            </a>
+/* when sidebar hidden, move toggle to left edge */
+.sidebar.hidden + .toggle-btn {
+  left: 14px;
+}
+
+/* On very small screens place toggle inside header area */
+@media (max-width: 576px) {
+  .toggle-btn { left: 12px; top: 64px; }
+  .sidebar { width: calc(100% - 40px); max-width: 360px; transform: translateX(-110%); }
+  .sidebar.visible-mobile { transform: translateX(0); }
+  .sidebar.hidden { transform: translateX(-110%); }
+  .sidebar.hidden + .toggle-btn { left: 12px; }
+}
+
+/* ---------- Main content (shifts when sidebar visible) ---------- */
+.main-content {
+  margin-top: 20px;
+  padding: 28px;
+  transition: margin-left 320ms cubic-bezier(.2,.9,.2,1);
+  margin-left: var(--sidebar-w); /* leave room for sidebar */
+}
+
+/* when sidebar hidden, expand content to fill */
+.sidebar.hidden ~ .main-content {
+  margin-left: 24px;
+}
+
+/* on small screens always full width */
+@media (max-width: 992px) {
+  .main-content { margin-left: 18px; margin-right: 18px; }
+}
+
+/* ---------- Stats Grid ---------- */
+.dashboard-grid {
+  display: grid;
+  gap: 1.2rem;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 992px) {
+  .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 576px) {
+  .dashboard-grid { grid-template-columns: 1fr; }
+}
+
+/* ---------- Stat cards ---------- */
+.stat-card {
+  background: var(--card-bg);
+  border-radius: 14px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 6px 22px rgba(16,24,40,0.06);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+.stat-card:hover { transform: translateY(-6px); box-shadow: 0 10px 28px rgba(16,24,40,0.08); }
+
+.stat-icon {
+  display:inline-flex;
+  width:52px; height:52px;
+  align-items:center; justify-content:center;
+  border-radius: 50%;
+  color:#fff;
+  font-size:22px;
+  margin-bottom:10px;
+}
+.stat-title { font-weight:600; color:var(--muted); margin-bottom:4px; }
+.stat-value { font-size:1.9rem; font-weight:700; color:#1f2937; }
+
+/* small tweaks */
+h2.dashboard-heading { margin: 6px 0 20px 0; color:#0b5ed7; font-weight:700; }
+
+/* prefers dark theme */
+@media (prefers-color-scheme: dark) {
+  body { background:#0f1720; color:#e6eef8; }
+  .stat-card { background:#0b1220; box-shadow:none; }
+  .main-content { color: #e6eef8; }
+}
+</style>
+
+<div class="wrapper">
+
+  <!-- Sidebar overlay (used on mobile) -->
+  <div id="sidebarOverlay" class="sidebar-overlay" role="button" aria-hidden="true"></div>
+
+  <!-- Sidebar -->
+  <nav id="sidebar" class="sidebar" aria-label="Sidebar navigation">
+    <ul>
+      <li><a href="{{ url_for('dashboard') }}" class="active"><i class="bi bi-speedometer2"></i><span>Dashboard</span></a></li>
+      <li><a href="{{ url_for('add_device') }}"><i class="bi bi-plus-circle"></i><span>Add Device</span></a></li>
+      <li><a href="{{ url_for('assigned_devices') }}"><i class="bi bi-laptop"></i><span>Assigned</span></a></li>
+      <li><a href="{{ url_for('device_assign') }}"><i class="bi bi-person-workspace"></i><span>Unassigned</span></a></li>
+      <li><a href="{{ url_for('delivery_ready') }}"><i class="bi bi-truck"></i><span>Delivery</span></a></li>
+      <li><a href="{{ url_for('device_time_overlap') }}"><i class="bi bi-clock-history"></i><span>Overdue</span></a></li>
+      <li><a href="{{ url_for('closed_device_history') }}"><i class="bi bi-archive"></i><span>Closed History</span></a></li>
+      <li><a href="{{ url_for('crm.list_leads') }}"><i class="bi bi-people"></i><span>CRM Leads</span></a></li>
+      <li><a href="{{ url_for('crm.add_lead') }}"><i class="bi bi-person-plus"></i><span>Add Lead</span></a></li>
+      <li><a href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right"></i><span>Logout</span></a></li>
+    </ul>
+  </nav>
+
+  <!-- Toggle button -->
+  <button id="toggleSidebar" class="toggle-btn" aria-label="Toggle sidebar" aria-expanded="true">
+    <i class="bi bi-list"></i>
+  </button>
+
+  <!-- Main content -->
+  <main class="main-content">
+    <h2 class="dashboard-heading">Device Overview</h2>
+
+    <div class="dashboard-grid">
+      <a href="{{ url_for('add_device') }}" class="card-link">
+        <div class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg,#0d6efd,#2cb0ff)"><i class="bi bi-plus-circle"></i></div>
+          <div class="stat-title">Add New Device</div>
+          <div class="stat-value">+</div>
         </div>
-    </div>
+      </a>
+
+      <a href="{{ url_for('assigned_devices') }}" class="card-link">
+        <div class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg,#28a745,#74d19e)"><i class="bi bi-laptop"></i></div>
+          <div class="stat-title">Assigned Devices</div>
+          <div class="stat-value">{{ assigned_devices_count }}</div>
+        </div>
+      </a>
+
+      <a href="{{ url_for('device_assign') }}" class="card-link">
+        <div class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg,#17a2b8,#63d4e9)"><i class="bi bi-box-seam"></i></div>
+          <div class="stat-title">Unassigned Devices</div>
+          <div class="stat-value">{{ unassigned_devices_count }}</div>
+        </div>
+      </a>
+
+      <a href="{{ url_for('delivery_ready') }}" class="card-link">
+        <div class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg,#ffc107,#ffd86b)"><i class="bi bi-receipt"></i></div>
+          <div class="stat-title">Unbilled Devices</div>
+          <div class="stat-value">{{ unbilled_devices_count }}</div>
+        </div>
+      </a>
+
+      <a href="{{ url_for('closed_devices') }}" class="card-link">
+        <div class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg,#dc3545,#ff7b90)"><i class="bi bi-truck"></i></div>
+          <div class="stat-title">Delivery Awaiting</div>
+          <div class="stat-value">{{ delivery_ready_devices }}</div>
+        </div>
+      </a>
+
+      <a href="{{ url_for('device_time_overlap') }}" class="card-link">
+        <div class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg,#6f42c1,#b06ab3)"><i class="bi bi-clock-history"></i></div>
+          <div class="stat-title">Service Overdue</div>
+          <div class="stat-value">{{ pending_delivery_count }}</div>
+        </div>
+      </a>
+
+      <a href="{{ url_for('closed_device_history') }}" class="card-link">
+        <div class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg,#343a40,#6c757d)"><i class="bi bi-archive"></i></div>
+          <div class="stat-title">Closed History</div>
+          <div class="stat-value">{{ closed_device_history }}</div>
+        </div>
+      </a>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg,#20c997,#9be7c7)"><i class="bi bi-cash-stack"></i></div>
+        <div class="stat-title">Bill Processed Today</div>
+        <div class="stat-value">₹{{ bill_today }}</div>
+      </div>
+    </div> <!-- grid -->
+  </main>
 </div>
-{% endblock %}
 
-{% block scripts %}
 <script>
-    console.log("Dashboard loaded.");
+(function(){
+  const sidebar = document.getElementById('sidebar');
+  const toggle = document.getElementById('toggleSidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const body = document.body;
+
+  // initial state (sidebar visible). You can set to hidden by default:
+  let open = true;
+
+  function setState(isOpen){
+    open = Boolean(isOpen);
+    if(open){
+      sidebar.classList.remove('hidden');
+      overlay.classList.add('visible');
+      toggle.setAttribute('aria-expanded','true');
+    } else {
+      sidebar.classList.add('hidden');
+      overlay.classList.remove('visible');
+      toggle.setAttribute('aria-expanded','false');
+    }
+
+    // On large screens we hide overlay visually but keep it non-interactive
+    if(window.innerWidth > 992){
+      overlay.classList.remove('visible');
+    }
+  }
+
+  // Toggle handler
+  toggle.addEventListener('click', function(e){
+    setState(!open);
+    // if opening on mobile, show overlay
+    if(window.innerWidth <= 992 && open){
+      overlay.classList.add('visible');
+    }
+  });
+
+  // overlay click closes sidebar (mobile-friendly)
+  overlay.addEventListener('click', function(){
+    setState(false);
+  });
+
+  // Close sidebar when window resizes from small to large to avoid stuck overlay
+  window.addEventListener('resize', function(){
+    if(window.innerWidth > 992){
+      // ensure overlay hidden on larger screens
+      overlay.classList.remove('visible');
+      // keep sidebar open on larger screens by default
+      setState(true);
+    } else {
+      // on small screens default to closed
+      setState(false);
+    }
+  });
+
+  // initialize based on current width
+  if(window.innerWidth <= 992){
+    setState(false);
+  } else {
+    setState(true);
+  }
+})();
 </script>
 {% endblock %}

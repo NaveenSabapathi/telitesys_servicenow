@@ -4,31 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9174245e-d628-4566-b313-513376855475" name="Changes" comment="almost done&#10;mobile view updated&#10;postgres done&#10;image upload done&#10;&#10;&#10;functional testing pending&#10;&#10;print billing ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying&#10;&#10;CRM integ pending&#10;&#10;Config edit done, need to do Notification setup for user and assignee&#10;&#10;workflow updated">
-      <change afterPath="$PROJECT_DIR$/crm/forms.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/forms.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/routes.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/crm/add_ld.old.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/crm/lead_view.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/crm/list_leads.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/inventory/dashboard.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/inventory/goods_in_form.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/inventory/goods_out_form.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/inventory/recent_transactions.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/inventory/stock_table.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/telitesys_servicenow.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/telitesys_servicenow.iml" afterDir="false" />
+    <list default="true" id="9174245e-d628-4566-b313-513376855475" name="Changes" comment="New module Inventory&#10;CRM update views&#10;&#10;&#10;&#10;functional testing pending&#10;&#10;print billing ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying&#10;&#10;CRM integ pending&#10;&#10;Config edit done, need to do Notification setup for user and assignee&#10;&#10;workflow updated">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app_cusdata.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_cusdata.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/crm/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/crm/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/crm/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/crm/routes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/crm/add_lead.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/crm/add_lead.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/crm/followup.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/crm/followup.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboard.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -350,7 +328,15 @@
       <option name="project" value="LOCAL" />
       <updated>1750949050720</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="New module Inventory&#10;CRM update views&#10;&#10;&#10;&#10;functional testing pending&#10;&#10;print billing ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying&#10;&#10;CRM integ pending&#10;&#10;Config edit done, need to do Notification setup for user and assignee&#10;&#10;workflow updated">
+      <option name="closed" value="true" />
+      <created>1761134648565</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1761134648565</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -364,6 +350,7 @@
     <MESSAGE value="almost done&#10;mobile view updated&#10;postgres done&#10;image upload done&#10;&#10;&#10;functional testing pending&#10;&#10;print billing ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying&#10;&#10;CRM integ pending&#10;&#10;Config edit done, need to do Notification setup for user and assignee" />
     <MESSAGE value="Merge remote-tracking branch 'origin/master'&#10;&#10;# Conflicts:&#10;#&#9;.env" />
     <MESSAGE value="almost done&#10;mobile view updated&#10;postgres done&#10;image upload done&#10;&#10;&#10;functional testing pending&#10;&#10;print billing ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying&#10;&#10;CRM integ pending&#10;&#10;Config edit done, need to do Notification setup for user and assignee&#10;&#10;workflow updated" />
-    <option name="LAST_COMMIT_MESSAGE" value="almost done&#10;mobile view updated&#10;postgres done&#10;image upload done&#10;&#10;&#10;functional testing pending&#10;&#10;print billing ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying&#10;&#10;CRM integ pending&#10;&#10;Config edit done, need to do Notification setup for user and assignee&#10;&#10;workflow updated" />
+    <MESSAGE value="New module Inventory&#10;CRM update views&#10;&#10;&#10;&#10;functional testing pending&#10;&#10;print billing ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying&#10;&#10;CRM integ pending&#10;&#10;Config edit done, need to do Notification setup for user and assignee&#10;&#10;workflow updated" />
+    <option name="LAST_COMMIT_MESSAGE" value="New module Inventory&#10;CRM update views&#10;&#10;&#10;&#10;functional testing pending&#10;&#10;print billing ok&#10;&#10;made some UI change and added print acknowledgement&#10;&#10;Whatsapp integration ---&gt; verifying&#10;&#10;CRM integ pending&#10;&#10;Config edit done, need to do Notification setup for user and assignee&#10;&#10;workflow updated" />
   </component>
 </project>
