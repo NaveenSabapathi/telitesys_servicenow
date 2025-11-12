@@ -1,87 +1,81 @@
+{# templates/device_overlap.html #}
 {% extends "base.html" %}
-{% block title %}Deadline Missed Devices{% endblock %}
+{% block title %}Device Overlap{% endblock %}
+
 {% block content %}
-<div class="container mt-5">
-    <h1 class="text-center mb-4">Pending Service Devices</h1>
-    <table class="table table-bordered">
-        <thead class="thead-dark">
-            <tr>
-                <th>Device Name</th>
-                <th>Serial Number</th>
-                <th>Issue Description</th>
-                <th>Status</th>
-                <th>New Delivery Date</th>
-                <th>Assign To</th>
-                <th>Description</th>
-                <th>Remarks</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for device in pending_devices %}
-            <tr>
-                <form class="device-update-form" data-device-id="{{ device.id }}">
-                    <td>{{ device.device_name }}</td>
-                    <td>{{ device.serial_number }}</td>
-                    <td>{{ device.issue_description }}</td>
-                    <td>{{ device.device_status }}</td>
-                    <td>
-                        <input type="date" name="new_expected_date" class="form-control" required>
-                    </td>
-                    <td>
-                        <select name="assigned_to" class="form-control" required>
-                            <option value="" disabled selected>Choose</option>
-                            {% for user in available_users %}
-                                <option value="{{ user.username }}">{{ user.username }}</option>
-                            {% endfor %}
-                        </select>
-                    </td>
-                    <td>
-                        <input type="text" name="description" class="form-control" value="{{ device.description }}">
-                    </td>
-                    <td>
-                        <input type="text" name="remarks" class="form-control" placeholder="Optional">
-                    </td>
-                    <td>
-                        <button type="submit" class="btn btn-success btn-sm">Update & Notify</button>
-                    </td>
-                </form>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="container">
+  <h2>Overdue / Pending Devices</h2>
 
-    <!-- Pagination -->
-    <nav aria-label="Page navigation">
-        <ul class="pagination justify-content-center">
-            <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-            <li class="page-item"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item"><a class="page-link" href="#">Next</a></li>
-        </ul>
-    </nav>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Service ID</th>
+        <th>Device</th>
+        <th>Customer</th>
+        <th>Expected Delivery</th>
+        <th>Assigned To</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for device in pending_devices %}
+      <tr>
+        <td>{{ device.service_id }}</td>
+        <td>{{ device.device_name or '-' }}</td>
+        <td>
+          {% set cust = device_customer_info.get(device.id) %}
+          {{ cust.name if cust else 'Unknown' }}
+        </td>
+        <td>
+          {% if device.expected_delivery_date %}
+            {{ device.expected_delivery_date.strftime('%Y-%m-%d') }}
+          {% else %}
+            -
+          {% endif %}
+        </td>
+        <td>
+          {% if device.assigned_to %}
+            {# find username from available_users list #}
+            {% set assigned_user = (available_users | selectattr('id','equalto', device.assigned_to) | list).0 %}
+            {{ assigned_user.username if assigned_user else device.assigned_to }}
+          {% else %}
+            Unassigned
+          {% endif %}
+        </td>
+        <td>
+          <button class="btn btn-sm btn-primary" data-bs-toggle="collapse" data-bs-target="#assignForm{{ device.id }}">Assign / Update</button>
+
+          <div id="assignForm{{ device.id }}" class="collapse mt-2">
+            <form method="post" action="{{ url_for('update_device_info') }}">
+              {{ csrf_token() }}
+              <input type="hidden" name="device_id" value="{{ device.id }}">
+              <div class="mb-2">
+                <label for="assigned_to_{{ device.id }}">Assign To</label>
+                <select name="assigned_to" id="assigned_to_{{ device.id }}" class="form-select">
+                  <option value="">-- Select user --</option>
+                  {% for u in available_users %}
+                    <option value="{{ u.id }}" {% if device.assigned_to == u.id %}selected{% endif %}>{{ u.username }} ({{ u.user_level }})</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="mb-2">
+                <label for="new_expected_date_{{ device.id }}">New Expected Date</label>
+                <input type="date" name="new_expected_date" id="new_expected_date_{{ device.id }}" class="form-control"
+                       value="{% if device.expected_delivery_date %}{{ device.expected_delivery_date.strftime('%Y-%m-%d') }}{% endif %}">
+              </div>
+              <div class="mb-2">
+                <label for="description_{{ device.id }}">Description / Remarks</label>
+                <textarea name="description" id="description_{{ device.id }}" class="form-control" rows="2">{{ device.description or device.remark or '' }}</textarea>
+              </div>
+              <button type="submit" class="btn btn-success btn-sm">Save</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to dashboard</a>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    $(document).ready(function () {
-        $('.device-update-form').on('submit', function (e) {
-            e.preventDefault();
-            const form = $(this);
-            const deviceId = form.data('device-id');
-            const formData = form.serialize() + `&device_id=${deviceId}`;
-
-            $.post('/update_device_info', formData, function (response) {
-                if (response.success) {
-                    alert("Device updated and assigned!");
-                    location.reload();
-                } else {
-                    alert(response.message || "Update failed!");
-                }
-            });
-        });
-    });
-</script>
 {% endblock %}
