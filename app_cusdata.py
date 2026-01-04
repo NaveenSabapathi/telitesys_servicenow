@@ -1,7 +1,11 @@
 # app_cusdata.py (patched)
+import traceback
+
+import logging
+from logging.handlers import RotatingFileHandler
 from flask import Flask, render_template, redirect, url_for, request, flash, jsonify
 from flask_login import LoginManager, login_user, current_user, logout_user, login_required
-from models import User, db, Device, Customer, SparePart, Service
+from models import User, db, Device, Customer, SparePart, Service, AssignStatus
 from flask_wtf.csrf import CSRFProtect, validate_csrf, CSRFError, generate_csrf
 from flask_migrate import Migrate
 import matplotlib, os
@@ -27,16 +31,21 @@ except Exception:
     # if blueprint not present during tests, ignore
     pass
 
-# If you have inventory blueprint, register similarly (commented out in some copies)
-# from inventory.routes import inventory_bp
-# app.register_blueprint(inventory_bp, url_prefix='/inventory')
-
 db.init_app(app)
 migrate = Migrate(app, db)
 
 # defensive blueprint registration - put near other blueprint registration code
-import traceback
-import logging
+
+file_handler = RotatingFileHandler('app.log', maxBytes=10240, backupCount=10)
+file_handler.setFormatter(logging.Formatter(
+    '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+))
+file_handler.setLevel(logging.INFO)
+
+# Apply handler to the Flask App
+app.logger.addHandler(file_handler)
+app.logger.setLevel(logging.INFO)
+app.logger.info('Application startup detected')
 
 # ensure app.logger configured
 if not app.logger.handlers:
@@ -204,18 +213,21 @@ def dashboard():
     today = datetime.now().date()
 
     if current_user.user_level == 'admin':
-        # NOTE: cast DB datetime to date for proper comparison
-        assigned_devices_count = Device.query.filter_by(assign_status='Assigned').count()
-        available_devices = Device.query.filter_by(assign_status='Assigned').all()
-        unassigned_devices_count = Device.query.filter_by(assign_status='Unassigned').count()
-        unbilled_devices_count = Device.query.filter_by(assign_status='Delivery Pending').count()
-        delivery_ready_devices = Device.query.filter_by(assign_status='Closed').count()
+        # FIX: Use Enum members instead of strings
+        assigned_devices_count = Device.query.filter_by(assign_status=AssignStatus.ASSIGNED).count()
+        available_devices = Device.query.filter_by(assign_status=AssignStatus.ASSIGNED).all()
+        unassigned_devices_count = Device.query.filter_by(assign_status=AssignStatus.UNASSIGNED).count()
 
-        # pending delivery: expected_delivery_date (date part) < today and not Delivered
+        # 'Delivery Pending' maps to SERVICED in the DB
+        unbilled_devices_count = Device.query.filter_by(assign_status=AssignStatus.SERVICED).count()
+
+        # 'Closed' maps to DELIVERED in the DB
+        delivery_ready_devices = Device.query.filter_by(assign_status=AssignStatus.DELIVERED).count()
+
         pending_delivery_count = Device.query.filter(
             and_(
                 cast(Device.expected_delivery_date, saDate) < today,
-                Device.device_status != 'Delivered'
+                Device.assign_status != AssignStatus.DELIVERED  # FIX
             )
         ).count()
 
@@ -270,7 +282,7 @@ def print_bill(device_id):
 def bill_today():
     today = datetime.now().date()
     # Use assign_status 'Delivered' to get completed devices
-    service_done = Device.query.filter_by(assign_status='Delivered').all()
+    service_done = Device.query.filter_by(assign_status=AssignStatus.DELIVERED).all()
     bill_amount = 0.0
     for service in service_done:
         proc_date = safe_to_date(service.expected_delivery_date)
@@ -433,36 +445,6 @@ def ack_ticket(device_id):
     return render_template('ack_ticket.html', device=device, customer=customer)
 
 
-# @app.route('/device_time_overlap', methods=['GET'])
-# @login_required
-# def device_time_overlap():
-#     if current_user.user_level != "admin":
-#         return redirect(url_for('dashboard'))
-#
-#     today = datetime.now().date()
-#     pending_devices = Device.query.filter(
-#         and_(
-#             cast(Device.expected_delivery_date, saDate) < today,
-#             Device.device_status != 'Delivered'
-#         )
-#     ).all()
-#
-#     if not pending_devices:
-#         return redirect(url_for('dashboard'))
-#
-#     # build device -> customer mapping
-#     device_customer_info = {device.id: Customer.query.get(device.customer_id) for device in pending_devices}
-#     # also build assigned_to map (user id -> user object lookup not necessary, template can show device.assigned_to as id)
-#     # Pass the pending_devices and the device_customer_info mapping to the template
-#     users = User.query.all()
-#
-#     return render_template(
-#         'device_overlap.html',
-#         pending_devices=pending_devices,
-#         available_users=users,
-#         device_customer_info=device_customer_info
-#     )
-
 @app.route('/device_time_overlap', methods=['GET'])
 @login_required
 def device_time_overlap():
@@ -538,15 +520,11 @@ def update_device_info():
             user_obj = User.query.filter_by(username=assigned_to).first()
 
         if user_obj:
-            # assign as integer id
             device.assigned_to = int(user_obj.id)
-            device.assign_status = 'Assigned'
-            # Optional: set device.device_status to 'In Service' or similar
-            # device.device_status = 'In Service'
+            device.assign_status = AssignStatus.ASSIGNED  # FIX
         else:
-            # if provided value can't be resolved, keep device unassigned
             device.assigned_to = None
-            device.assign_status = 'Unassigned'
+            device.assign_status = AssignStatus.UNASSIGNED  # FIX
 
     db.session.commit()
 
@@ -613,7 +591,7 @@ def assigning_devices():
             user_obj = User.query.filter_by(username=user_id).first()
             device.assigned_to = user_obj.id if user_obj else None
 
-        device.assign_status = "Assigned"
+        device.assign_status = AssignStatus.ASSIGNED
         db.session.commit()
         flash('Device assigned successfully!', 'success')
     else:
@@ -712,7 +690,7 @@ def finish_service():
 
     device = Device.query.get(device_id)
     if device:
-        device.assign_status = "Delivery Pending"
+        device.assign_status = AssignStatus.SERVICED
         db.session.commit()
         flash('Device marked Delivery Pending', 'success')
     else:
@@ -760,42 +738,105 @@ def closed_devices():
     return redirect(url_for('dashboard'))
 
 
+# @app.route('/close_device_all', methods=['POST'])
+# @login_required
+# def close_device_all():
+#     device_id = request.form.get('device_id')
+#     bill_status = request.form.get('bill_status')
+#     amount_received = request.form.get('amount_received')
+#     delivery_status = request.form.get('delivery_status')
+#
+#     if delivery_status in ['true', 'True', 'on', '1', True]:
+#         final_status = AssignStatus.DELIVERED
+#         dev_status_str = 'Delivered'
+#     else:
+#         # If unchecked, revert to Serviced (ready but not taken)
+#         final_status = AssignStatus.SERVICED
+#         dev_status_str = 'Ready'
+#
+#     if (not amount_received or amount_received.strip() == '') and delivery_status != 'Delivered':
+#         return jsonify({'error': 'Amount received is required and delivery status must be checked'}), 400
+#
+#     device = Device.query.get(device_id)
+#     if not device:
+#         return jsonify({'error': 'Device not found'}), 404
+#
+#     device.bill_status = bill_status
+#     try:
+#         device.amount_received = float(amount_received) if amount_received else 0.0
+#     except Exception:
+#         device.amount_received = 0.0
+#
+#     device.device_status = delivery_status
+#     device.assign_status = delivery_status
+#
+#     if delivery_status == 'Delivered':
+#         device.expected_delivery_date = datetime.now()
+#
+#     db.session.commit()
+#
+#     return jsonify({'message': 'Device closed successfully'}), 200
+
+
 @app.route('/close_device_all', methods=['POST'])
 @login_required
 def close_device_all():
     device_id = request.form.get('device_id')
     bill_status = request.form.get('bill_status')
     amount_received = request.form.get('amount_received')
-    delivery_status = request.form.get('delivery_status')
+    raw_delivery_status = request.form.get('delivery_status')  # Renamed for clarity
 
-    if delivery_status in ['true', 'True', 'on', '1', True]:
-        delivery_status = 'Delivered'
+    app.logger.info(f"Attempting to close device {device_id} | User: {current_user.username}")
+    app.logger.debug(f"Form Data: BillStatus={bill_status}, Amount={amount_received}, Delivery={raw_delivery_status}")
+
+    # Logic Fix: Determine statuses based on checkbox
+    if raw_delivery_status in ['true', 'True', 'on', '1', True]:
+        final_assign_status = AssignStatus.DELIVERED
+        final_device_status_str = 'Delivered'
     else:
-        delivery_status = 'Undelivered'
+        # If unchecked, revert to Serviced (ready but not taken)
+        final_assign_status = AssignStatus.SERVICED
+        final_device_status_str = 'Ready'
 
-    if (not amount_received or amount_received.strip() == '') and delivery_status != 'Delivered':
+    # Validation: Ensure amount is present if required
+    # Logic Fix: Check against final_assign_status, not the raw input string
+    if (not amount_received or amount_received.strip() == '') and final_assign_status != AssignStatus.DELIVERED:
+        app.logger.warning(f"Validation Failed: Missing amount for device {device_id}")
         return jsonify({'error': 'Amount received is required and delivery status must be checked'}), 400
 
     device = Device.query.get(device_id)
     if not device:
+        app.logger.error(f"Device Not Found: ID {device_id}")
         return jsonify({'error': 'Device not found'}), 404
 
-    device.bill_status = bill_status
     try:
-        device.amount_received = float(amount_received) if amount_received else 0.0
-    except Exception:
-        device.amount_received = 0.0
+        # Update Billing
+        device.bill_status = bill_status
+        try:
+            device.amount_received = float(amount_received) if amount_received else 0.0
+        except ValueError:
+            app.logger.error(f"Invalid Amount Format: {amount_received} for device {device_id}")
+            device.amount_received = 0.0
 
-    device.device_status = delivery_status
-    device.assign_status = delivery_status
+        # Update Statuses
+        # CRITICAL FIX: Assign the calculated Enum/String, NOT the raw form input
+        device.device_status = final_device_status_str
+        device.assign_status = final_assign_status
 
-    if delivery_status == 'Delivered':
-        device.expected_delivery_date = datetime.now()
+        # Set delivery date if delivered
+        if final_assign_status == AssignStatus.DELIVERED:
+            device.expected_delivery_date = datetime.now()
 
-    db.session.commit()
+        db.session.commit()
 
-    return jsonify({'message': 'Device closed successfully'}), 200
+        app.logger.info(
+            f"SUCCESS: Device {device_id} closed. Status: {final_assign_status.value}, Amount: {device.amount_received}")
+        return jsonify({'message': 'Device closed successfully'}), 200
 
+    except Exception as e:
+        db.session.rollback()
+        app.logger.critical(f"Database Commit Failed for device {device_id}: {str(e)}")
+        return jsonify({'error': 'Internal Server Error'}), 500
 
 @app.route('/closed_device_history', methods=['GET'])
 @login_required
