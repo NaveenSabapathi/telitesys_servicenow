@@ -18,8 +18,8 @@
                     <th>Serial No</th>
                     <th>Customer</th>
                     <th>Phone</th>
-                    <th>Spent (Cost)</th>
-                    <th>Received</th>
+                    <th>Bill (Cost)</th>
+                    <th>Expected</th>
                     <th>Assigned Tech</th>
                     <th>Delivered Date</th>
                 </tr>
@@ -32,12 +32,18 @@
                     <td>{{ d.customer.name }}</td>
                     <td>{{ d.customer.whatsapp_number }}</td>
 
-                    <td class="text-danger font-weight-bold">{{ d.total_cost or 0.0 }}</td>
-                    <td class="text-success font-weight-bold">{{ d.amount_received or 0.0 }}</td>
+                    <td class="text-danger font-weight-bold">{{ d.bill_value or 0.0 }}</td>
+                    <td class="text-success font-weight-bold">{{ d.expected_budget or 0.0 }}</td>
 
                     <td>{{ device_serviced_by[d.id] }}</td>
 
                     <td>{{ d.expected_delivery_date.strftime('%Y-%m-%d') if d.expected_delivery_date else 'N/A' }}</td>
+                    <td>
+                        <a href="{{ url_for('device_audit', device_id=d.id) }}"
+                         class="btn btn-sm btn-outline-primary">
+                          View Timeline
+                     </a>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
