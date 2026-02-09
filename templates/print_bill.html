@@ -69,7 +69,16 @@
             <div><span class="label">Device:</span> <span class="value">{{ device.device_name }}</span></div>
             <div><span class="label">Serial Number:</span> <span class="value">{{ device.serial_number }}</span></div>
             <div><span class="label">Issue Reported:</span> <span class="value">{{ device.issue_description }}</span></div>
-            <div><span class="label">Work Done:</span> <span class="value">{{ device.work_done or 'N/A' }}</span></div>
+            <div>
+  <span class="label">Spare Parts Used:</span>
+  <span class="value">
+    {% if spare_parts %}
+      {{ spare_parts | map(attribute='spare_name') | join(', ') }}
+    {% else %}
+      AS MENTIONED
+    {% endif %}
+  </span>
+</div>
         </div>
 
         <div class="line"></div>
@@ -79,7 +88,7 @@
             <div><span class="label">              </span> <span class="value"></span></div>
             <div><span class="label">             </span> <span class="value"></span></div>
             <div><span class="label">             </span> <span class="value"></span></div>
-            <div><span class="label">Date:</span> <span class="value"> </span></div>
+            <div><span class="label">Date: {{ (device.delivery_date) }}</span> <span class="value"> </span></div>
         </div>
 
         <div class="line"></div>

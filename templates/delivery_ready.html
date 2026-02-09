@@ -1,41 +1,75 @@
 {% extends "base.html" %}
 
-{% block title %}Devices with Delivery Pending{% endblock %}
+{% block title %}Devices Ready for Delivery{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="text-center mb-4">Devices with Delivery Pending</h2>
+    <h2 class="text-center mb-4">Devices Ready for Delivery (Serviced)</h2>
+
+    {% if not delivery_devices %}
+    <div class="alert alert-success text-center">
+        No pending serviced devices. Good job!
+    </div>
+    {% endif %}
 
     {% for device in delivery_devices %}
-    <div class="card mb-3 shadow-sm">
+    <div class="card mb-3 shadow-sm border-primary">
         <div class="card-body">
-            <h5 class="card-title">{{ device.device_name }}</h5>
+            <div class="d-flex justify-content-between">
+                <h5 class="card-title text-primary">{{ device.device_name }}</h5>
+                <span class="badge badge-warning">Status: {{ device.assign_status.value }}</span>
+            </div>
+
             <p class="mb-1"><strong>Serial Number:</strong> {{ device.serial_number }}</p>
             <p class="mb-1"><strong>Issue:</strong> {{ device.issue_description }}</p>
-            <p class="mb-1"><strong>Delivery Date:</strong> {{ device.expected_delivery_date.strftime('%Y-%m-%d') }}</p>
 
-            <button class="btn btn-primary btn-sm w-100 mt-2" onclick="toggleServiceDetails('{{ device.id }}')">
-                Show Service Details
+            <button class="btn btn-outline-primary btn-sm w-100 mt-2" onclick="toggleServiceDetails('{{ device.id }}')">
+                Show Billing & Delivery Options
             </button>
 
-            <div class="mt-3" id="service-details-{{ device.id }}" style="display: none;">
-                <h6>Spare Parts</h6>
+            <div class="mt-3 p-3 bg-light rounded" id="service-details-{{ device.id }}" style="display: none;">
+
+                <h6>Parts Used:</h6>
                 <ul class="list-group mb-3">
                     {% for service in device_service_info[device.id] %}
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span>{{ service.spare_name }}</span>
-                        <span>₹{{ service.cost }}</span>
+                    <li class="list-group-item d-flex justify-content-between py-1">
+                        <small>{{ service.spare_name }}</small>
+                        <small>₹{{ service.cost }}</small>
                     </li>
                     {% endfor %}
+                    {% if not device_service_info[device.id] %}
+                    <li class="list-group-item text-muted py-1"><small>No spare parts added</small></li>
+                    {% endif %}
                 </ul>
 
-                <input type="number" inputmode="decimal" pattern="[0-9]*"
-                       class="form-control mb-2" id="bill-value-{{ device.id }}"
-                       placeholder="Enter Final Bill Value" required min="0" step="0.01">
+                <label>Final Bill Amount:</label>
+                <input type="number" class="form-control mb-2" id="bill-value-{{ device.id }}"
+                       placeholder="Total Bill Value" required min="0">
 
-                <button class="btn btn-success btn-sm w-100" onclick="closeDevice('{{ device.id }}')">
-                    Close Device
-                </button>
+                <label>Amount Received (Now):</label>
+                <input type="number" class="form-control mb-3" id="amount-received-{{ device.id }}"
+                       placeholder="₹ Amount Paid by Customer" value="0">
+
+                <div class="row">
+                    <div class="col-6">
+                        <form action="{{ url_for('generate_bill') }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="device_id" value="{{ device.id }}">
+                            <input type="hidden" name="bill_value" id="hidden-bill-{{ device.id }}">
+                            <button type="submit" class="btn btn-secondary btn-block btn-sm"
+                                    onclick="copyBillValue('{{ device.id }}')">
+                                Generate Bill Only<br><small>(Pay Later)</small>
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="col-6">
+                        <button class="btn btn-success btn-block btn-sm" onclick="deliverAndPrint('{{ device.id }}')">
+                            Deliver & Print<br><small>(Close Ticket)</small>
+                        </button>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -50,35 +84,46 @@
         $('#service-details-' + deviceId).toggle();
     }
 
-    function closeDevice(deviceId) {
-        const billInput = document.getElementById('bill-value-' + deviceId);
-        const billValue = billInput.value.trim();
-
-        if (!billValue || isNaN(billValue)) {
-            alert("Please enter a valid bill amount.");
-            billInput.focus();
-            return;
-        }
-
-        $.ajax({
-            url: '/close_device',
-            type: 'POST',
-            data: {
-                device_id: deviceId,
-                bill_value: billValue
-            },
-            headers: {
-                'X-CSRFToken': $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function(response) {
-                alert('Device closed and marked for delivery.');
-                window.location.reload();
-            },
-            error: function(xhr, status, error) {
-                console.error('AJAX error:', error);
-                alert('Something went wrong');
-            }
-        });
+    // Helper to copy the value for the 'Generate Bill' form submission
+    function copyBillValue(deviceId) {
+        const val = document.getElementById('bill-value-' + deviceId).value;
+        document.getElementById('hidden-bill-' + deviceId).value = val;
     }
+
+    function deliverAndPrint(deviceId) {
+    const billInput = document.getElementById('bill-value-' + deviceId).value;
+    const receivedInput = document.getElementById('amount-received-' + deviceId).value;
+
+    if (!billInput) {
+        alert("Please enter a Final Bill Value.");
+        return;
+    }
+     const csrfToken = document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute('content');
+    $.ajax({
+        url: '/close_device',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            device_id: deviceId,
+            bill_value: billInput,
+            amount_received: receivedInput,
+            csrf_token: "{{ csrf_token() }}"
+        },
+        success: function(resp) {
+            if (resp.success) {
+                window.open('/print_bill/' + deviceId, '_blank');
+                alert('Device Delivered Successfully!');
+                window.location.reload();
+            } else {
+                alert(resp.error || 'Failed to close device');
+            }
+        },
+        error: function(xhr) {
+            alert('Error closing device');
+        }
+    });
+}
 </script>
 {% endblock %}

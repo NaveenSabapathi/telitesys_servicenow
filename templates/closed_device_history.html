@@ -6,11 +6,10 @@
     <h2 class="text-center">Closed Device History</h2>
 
     <form method="get" class="form-inline my-3 justify-content-center">
-        <input type="text" name="search" class="form-control mr-2 mb-2" placeholder="Search by phone/device" value="{{ search_query }}">
+        <input type="text" name="search" class="form-control mr-2 mb-2" placeholder="Search by phone/device/serial" value="{{ search_query }}">
         <button class="btn btn-primary mb-2">Search</button>
     </form>
 
-    <!-- Desktop Table -->
     <div class="table-responsive d-none d-md-block">
         <table class="table table-hover table-bordered">
             <thead class="thead-dark">
@@ -19,10 +18,10 @@
                     <th>Serial No</th>
                     <th>Customer</th>
                     <th>Phone</th>
-                    <th>Issue</th>
-                    <th>Received</th>
-                    <th>Delivered</th>
-                    <th>Assigned</th>
+                    <th>Bill (Cost)</th>
+                    <th>Expected</th>
+                    <th>Assigned Tech</th>
+                    <th>Delivered Date</th>
                 </tr>
             </thead>
             <tbody>
@@ -32,17 +31,25 @@
                     <td>{{ d.serial_number }}</td>
                     <td>{{ d.customer.name }}</td>
                     <td>{{ d.customer.whatsapp_number }}</td>
-                    <td>{{ d.issue_description }}</td>
-                    <td>{{ d.received_date.strftime('%Y-%m-%d') }}</td>
-                    <td>{{ d.received_date.strftime('%Y-%m-%d') }}</td>
-                    <td>{{ d.assigned_to_user.username if d.assigned_to_user else 'N/A' }}</td>
+
+                    <td class="text-danger font-weight-bold">{{ d.bill_value or 0.0 }}</td>
+                    <td class="text-success font-weight-bold">{{ d.expected_budget or 0.0 }}</td>
+
+                    <td>{{ device_serviced_by[d.id] }}</td>
+
+                    <td>{{ d.expected_delivery_date.strftime('%Y-%m-%d') if d.expected_delivery_date else 'N/A' }}</td>
+                    <td>
+                        <a href="{{ url_for('device_audit', device_id=d.id) }}"
+                         class="btn btn-sm btn-outline-primary">
+                          View Timeline
+                     </a>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 
-    <!-- Mobile Card View -->
     <div class="d-block d-md-none">
         {% for d in closed_devices %}
         <div class="card mb-3 shadow-sm">
@@ -50,17 +57,19 @@
                 <h5 class="card-title">{{ d.device_name }}</h5>
                 <p><strong>Serial:</strong> {{ d.serial_number }}</p>
                 <p><strong>Customer:</strong> {{ d.customer.name }}</p>
-                <p><strong>Phone:</strong> {{ d.customer.whatsapp_number }}</p>
-                <p><strong>Issue:</strong> {{ d.issue_description }}</p>
-                <p><strong>Received:</strong> {{ d.received_date.strftime('%Y-%m-%d') }}</p>
-                <p><strong>Delivered:</strong> {{ d.received_date.strftime('%Y-%m-%d') }}</p>
-                <p><strong>Assigned To:</strong> {{ d.assigned_to_user.username if d.assigned_to_user else 'N/A' }}</p>
+
+                <hr>
+                <p class="text-danger"><strong>Spent:</strong> {{ d.total_cost or 0.0 }}</p>
+                <p class="text-success"><strong>Received:</strong> {{ d.amount_received or 0.0 }}</p>
+                <p><strong>Tech:</strong> {{ device_serviced_by[d.id] }}</p>
+                <hr>
+
+                <p><strong>Delivered:</strong> {{ d.expected_delivery_date.strftime('%Y-%m-%d') if d.expected_delivery_date else 'N/A' }}</p>
             </div>
         </div>
         {% endfor %}
     </div>
 
-    <!-- Pagination -->
     <nav>
         <ul class="pagination justify-content-center">
             {% if pagination.has_prev %}

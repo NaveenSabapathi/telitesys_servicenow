@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Audit Trail - {{ device.device_name }}{% endblock %}
+
+{% block content %}
+<style>
+    /* Scoped styles for timeline to fit within Base design */
+    .audit-container {
+        max-width: 900px;
+        margin: 30px auto;
+        background: #fff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .timeline {
+        position: relative;
+        margin-top: 30px;
+        padding-left: 30px;
+        border-left: 3px solid #e9ecef;
+    }
+
+    .event {
+        position: relative;
+        margin-bottom: 30px;
+        padding-left: 20px;
+    }
+
+    /* The timeline dot */
+    .event::before {
+        content: "";
+        position: absolute;
+        left: -38px; /* Aligns with the border */
+        top: 0px;
+        width: 16px;
+        height: 16px;
+        background: #007bff; /* Bootstrap Primary */
+        border: 3px solid #fff;
+        border-radius: 50%;
+        box-shadow: 0 0 0 2px #007bff;
+    }
+
+    .meta {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .reason-box {
+        background: #fff3cd; /* Bootstrap warning-light */
+        border-left: 4px solid #ffc107;
+        padding: 10px 15px;
+        margin-bottom: 15px;
+        border-radius: 4px;
+        font-size: 0.95rem;
+    }
+
+    .change-group {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 10px 15px;
+        margin-top: 10px;
+    }
+
+    .change-label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #495057;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .val-old {
+        color: #dc3545; /* Red */
+        text-decoration: line-through;
+        margin-right: 10px;
+        font-size: 0.9rem;
+    }
+
+    .val-new {
+        color: #28a745; /* Green */
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .back-link {
+        margin-bottom: 20px;
+        display: inline-block;
+        font-weight: 500;
+    }
+</style>
+
+<div class="audit-container">
+    <a href="{{ url_for('dashboard') }}" class="back-link text-decoration-none">
+        <i class="fas fa-arrow-left"></i> &larr; Back to Dashboard
+    </a>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Audit Trail: {{ device.device_name }}</h2>
+            <p class="text-muted mb-0">Service ID: <strong>{{ device.service_id }}</strong> | Model: {{ device.model }}</p>
+        </div>
+        <span class="badge bg-secondary">{{ device.assign_status.value if device.assign_status.value else device.assign_status }}</span>
+    </div>
+
+    {% if logs %}
+        <div class="timeline">
+            {% for log in logs %}
+            <div class="event">
+                <div class="meta">
+                    {{ log.updated_at.strftime('%d %b %Y, %I:%M %p') }}
+                    &nbsp;&bull;&nbsp;
+                    User: <strong>{{ users.get(log.updated_by, 'Unknown') }}</strong>
+                </div>
+
+                <div class="reason-box">
+                    <strong>Action:</strong> {{ log.update_reason or 'Update' }}
+                </div>
+
+                {% if log.old_description != log.new_description %}
+                <div class="change-group">
+                    <span class="change-label">Issue Description Changed</span>
+                    <div class="d-flex flex-wrap">
+                        <span class="val-old">{{ log.old_description or 'Empty' }}</span>
+                        <span class="val-new">{{ log.new_description or 'Empty' }}</span>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if log.old_expected_delivery_date != log.new_expected_delivery_date %}
+                <div class="change-group">
+                    <span class="change-label">Expected Delivery Date Changed</span>
+                    <div>
+                        <span class="val-old">
+                            {{ log.old_expected_delivery_date.strftime('%Y-%m-%d') if log.old_expected_delivery_date else 'Not Set' }}
+                        </span>
+                        <i class="fas fa-arrow-right text-muted mx-2"></i>
+                        <span class="val-new">
+                            {{ log.new_expected_delivery_date.strftime('%Y-%m-%d') if log.new_expected_delivery_date else 'Not Set' }}
+                        </span>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if log.old_assigned_to != log.new_assigned_to %}
+                <div class="change-group">
+                    <span class="change-label">Technician Re-assignment</span>
+                    <div>
+                        <span class="val-old">{{ log.old_assigned_to or 'Unassigned' }}</span>
+                        <i class="fas fa-arrow-right text-muted mx-2"></i>
+                        <span class="val-new">{{ log.new_assigned_to or 'Unassigned' }}</span>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <h4 class="text-muted">No audit history found for this device.</h4>
+            <p>Updates will appear here once changes are made.</p>
+        </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}
